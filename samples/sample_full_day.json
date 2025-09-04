@@ -1,0 +1,72 @@
+{
+  "date": "2025-09-03",
+  "moon_phase": "Waning Gibbous",
+  "moon_emoji": "🌖",
+  "day_planet": "Mercury",
+  "footer_charm": "✶",
+  "horoscope": {
+    "transit_summary": [
+      "Sun trine Moon: harmony between will and emotions.",
+      "Venus sextile Mars: creative spark in relationships."
+    ],
+    "upcoming_events": [
+      {"label": "Mercury sextile Jupiter", "window": "AM", "time": "09:30", "description": "Good for learning, writing, and planning."},
+      {"label": "Moon enters Virgo", "window": "PM", "time": "18:10", "description": "Focus shifts to details and routines."}
+    ],
+    "focus": {
+      "dos": ["Organize workspace", "Reach out to a friend"],
+      "donts": ["Overcommit", "Ignore details"],
+      "opportunities": ["Start a new project", "Declutter"],
+      "warnings": ["Avoid multitasking"]
+    },
+    "practical_tasks": [
+      "Sort mail",
+      "Water plants",
+      "Update calendar"
+    ],
+    "creative_flow": {
+      "project": "Sketchbook journaling",
+      "mode": "Freeform, no rules",
+      "time_box": "20 min after lunch",
+      "bonus": "Try a new color palette"
+    }
+  },
+  "ritual_kit": {
+    "checklist": {
+      "candle": "White",
+      "oil": "Lavender",
+      "crystal": "Amethyst",
+      "herb_incense": "Sage",
+      "extras": ["Bell", "Salt"]
+    },
+    "timing_blocks": [
+      {"type": "Casting", "intent": "Set intentions for clarity", "why": "Mercury's influence", "window_start": "07:00", "window_end": "08:00"},
+      {"type": "Manifesting", "intent": "Grow creative ideas", "why": "Venus-Mars aspect", "window_start": "10:00", "window_end": "12:00"},
+      {"type": "Releasing", "intent": "Let go of clutter", "why": "Waning Moon", "window_start": "20:00", "window_end": "21:00"}
+    ],
+    "notes": "Adapt rituals as needed for your space and time."
+  },
+  "chores_kitchen": {
+    "energy_of_day": "Today is about practical progress and gentle resets.",
+    "chores": {
+      "big": ["Vacuum living room"],
+      "small": ["Wipe kitchen counters", "Refill soap dispensers"],
+      "outdoor": ["Sweep porch"],
+      "plants": ["Mist ferns"]
+    },
+    "laundry_focus": "Towels",
+    "chores_to_avoid": ["Deep cleaning", "Heavy lifting"],
+    "shopping_check": "Milk, apples, dish soap",
+    "kitchen": {
+      "tea": "Chamomile",
+      "breakfast": "Oatmeal with berries",
+      "lunch": "Veggie wrap",
+      "dinner": "Stir-fry with tofu",
+      "snack_prep": "Chop carrots"
+    }
+  },
+  "evening_reflection": {
+    "prompt_1": "What did I learn about myself today?",
+    "prompt_2": "How did I nurture my creativity?"
+  }
+}

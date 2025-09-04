@@ -1,0 +1,147 @@
+{
+  "title": "Daily Planner (4-page) Schema",
+  "type": "object",
+  "required": ["date", "moon_phase_sign", "day_planet"],
+  "properties": {
+    "date": { "type": "string" },
+    "moon_phase_sign": { "type": "string" },
+    "day_planet": { "type": "string" },
+
+    "horoscope": {
+      "type": "object",
+      "properties": {
+        "transit_summary": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "upcoming_events": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["when", "text"],
+            "properties": {
+              "when": { "type": "string" },
+              "text": { "type": "string" }
+            },
+            "additionalProperties": false
+          }
+        },
+        "focus_of_day": {
+          "type": "object",
+          "properties": {
+            "dos": { "type": "array", "items": { "type": "string" } },
+            "donts": { "type": "array", "items": { "type": "string" } },
+            "opportunities": { "type": "array", "items": { "type": "string" } },
+            "warnings": { "type": "array", "items": { "type": "string" } }
+          },
+          "additionalProperties": false
+        },
+        "task_list": { "type": "array", "items": { "type": "string" } },
+        "creative_flow": {
+          "type": "object",
+          "properties": {
+            "project": { "type": "string" },
+            "mode": { "type": "string" },
+            "time_box": { "type": "string" },
+            "bonus": { "type": "string" }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+
+    "rituals": {
+      "type": "object",
+      "properties": {
+        "checklist": {
+          "type": "object",
+          "properties": {
+            "candle": { "type": "string" },
+            "oil": { "type": "string" },
+            "crystal": { "type": "string" },
+            "herb_incense": { "type": "string" },
+            "extras": { "type": "array", "items": { "type": "string" } }
+          },
+          "additionalProperties": false
+        },
+        "casting": {
+          "type": "object",
+          "properties": {
+            "intent": { "type": "string" },
+            "why": { "type": "string" },
+            "window_start": { "type": "string" },
+            "window_end": { "type": "string" }
+          },
+          "additionalProperties": false
+        },
+        "manifesting": {
+          "type": "object",
+          "properties": {
+            "intent": { "type": "string" },
+            "why": { "type": "string" },
+            "window_start": { "type": "string" },
+            "window_end": { "type": "string" }
+          },
+          "additionalProperties": false
+        },
+        "releasing": {
+          "type": "object",
+          "properties": {
+            "intent": { "type": "string" },
+            "why": { "type": "string" },
+            "window_start": { "type": "string" },
+            "window_end": { "type": "string" }
+          },
+          "additionalProperties": false
+        },
+        "notes": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+
+    "chores": {
+      "type": "object",
+      "properties": {
+        "energy_of_day": { "type": "string" },
+        "to_do": {
+          "type": "object",
+          "properties": {
+            "indoor_large": { "type": "string" },
+            "indoor_small": { "type": "string" },
+            "outdoor": { "type": "string" },
+            "plants": { "type": "string" }
+          },
+          "additionalProperties": false
+        },
+        "laundry_focus": { "type": "string" },
+        "avoid": { "type": "array", "items": { "type": "string" } },
+        "shopping_check": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+
+    "kitchen": {
+      "type": "object",
+      "properties": {
+        "tea_of_day": { "type": "string" },
+        "breakfast": { "type": "string" },
+        "lunch": { "type": "string" },
+        "dinner": { "type": "string" },
+        "snack_prep": { "type": "string" },
+        "notes": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+
+    "evening_reflection": {
+      "type": "object",
+      "properties": {
+        "prompt1": { "type": "string" },
+        "prompt2": { "type": "string" }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

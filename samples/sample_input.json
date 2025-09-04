@@ -1,0 +1,46 @@
+{
+  "date": "Monday, September 1, 2025",
+  "moon_phase_sign": "Waxing Gibbous in Sagittarius",
+  "day_planet": "Moon (Monday)",
+  "ritual_kit": {
+    "candle": "White pillar + purple tea light",
+    "oil": "Clary sage",
+    "crystal": "Selenite + Lapis",
+    "herb": "Bay leaf",
+    "mini_ritual": "On the balcony, speak one sanctuary intention, then sweep a threshold."
+  },
+  "upcoming_events": {
+    "transit_notes": "Moon brushes natal Saturn, approaches Uranus; squares natal Jupiter. Saturn stations retrograde in Pisces.",
+    "reflection": "Disciplined but awake; widen horizons without overextending."
+  },
+  "housewitch_chore": [
+    {"tag": "🕯️ indoor", "task": "Bedroom refresh: strip bedding, shake rugs, spritz linens."},
+    {"tag": "🌞 outdoor", "task": "Front courtyard tidy: sweep paths, trim one bush."},
+    {"tag": "🌿 plants", "task": "Dust leaves + water/fertilize one plant ready for growth."}
+  ],
+  "kitchen_witch": {
+    "idea": "Lemon-herb chicken & quinoa bowl with roasted peppers & zucchini.",
+    "ingredient": "Dark leafy greens with garlic.",
+    "treat": "Honey-cinnamon toast or berry yogurt.",
+    "notes": ""
+  },
+  "creative_flow": {
+    "project": "Memoir",
+    "mode": "Draft vignette about a horizon/expansion moment.",
+    "time_box": "45–60 min",
+    "bonus": "Skhem: brainstorm a threshold-crossing image."
+  },
+  "evening_reflection": {
+    "prompt1": "What opened up today that I want more of?",
+    "prompt2": "What weight can I set down before sleep?"
+  }
+    ,
+    "horoscope": {
+      "headline": "Steady Focus • Waxing Moon in Capricorn",
+      "summary": "Discipline + grounded optimism. Protect your time, direct energy into a single structure-building task.",
+      "bullets": [
+        "AM: boundary + one non-negotiable task",
+        "PM: small celebration for progress"
+      ]
+    }
+}

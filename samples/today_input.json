@@ -1,0 +1,113 @@
+{
+  "date": "2025-09-03 (Wed)",
+  "moon_phase_sign": "Waxing Gibbous in Capricorn",
+  "day_planet": "Mercury (Wednesday)",
+
+  "horoscope": {
+    "transit_summary": [
+      "Mercury square Uranus: mind-sparks, tech glitches, and abrupt pivots; keep comms simple and documented.",
+      "Moon square Mars: short fuse potential—move the body before big conversations.",
+      "Moon opposite Jupiter: watch for overcommitting or overexplaining; favor measured, practical steps.",
+      "Capricorn Moon + Virgo Sun vibe: organize, prune, ship small useful things."
+    ],
+    "upcoming_events": [
+      { "when": "Morning", "text": "Brief planning + intention-setting; align tasks to one pragmatic outcome." },
+      { "when": "AM window", "text": "Focused build block: quiet solo work; defer hot-button threads." },
+      { "when": "All day", "text": "Mercury-ruled day—keep notes, version your changes, sanity-check assumptions." },
+      { "when": "Background", "text": "Energy spikes/dips are normal today; pace yourself and keep hydration/snacks handy." }
+    ],
+    "focus_of_day": {
+      "dos": [
+        "Batch messages; keep them concise and kind.",
+        "Ship a small, done definition (PDF layout or helper script).",
+        "Ground with 5–10 min movement before hard tasks."
+      ],
+      "donts": [
+        "Don’t debate while hungry or rushed.",
+        "Don’t overpromise under Moon–Jupiter.",
+        "Don’t refactor everything—touch only what today needs."
+      ],
+      "opportunities": [
+        "Unexpected insight for JSON→PDF helpers.",
+        "Declutter one frictiony process (naming, folders, or templates)."
+      ],
+      "warnings": [
+        "Watch for edgy tone in DMs.",
+        "Tech gremlins; commit often and keep backups."
+      ]
+    },
+    "task_list": [
+      "Finalize Page 3 two-frame spacing and divider draw.",
+      "Add graceful-skip logic for empty sections (esp. transit_summary).",
+      "Draft old→new schema migration script skeleton.",
+      "Create a tiny sample dataset for e2e test.",
+      "Jot ‘gotchas’ from today into README."
+    ],
+    "creative_flow": {
+      "project": "Daily Planner 4-page generator",
+      "mode": "Edit / polish",
+      "time_box": "50–60 min",
+      "bonus": "Optional evening free-write: 10 lines about how Mercury energy actually showed up today."
+    }
+  },
+
+  "rituals": {
+    "checklist": {
+      "candle": "Gold or white (Mercury day clarity; Capricorn grounding)",
+      "oil": "Peace & Protection (steady comms under Mercury–Uranus)",
+      "crystal": "Smoky quartz + black tourmaline (grounding, boundaries)",
+      "herb_incense": "Rosemary or frankincense (clear mental space)",
+      "extras": ["Singing bowl 3x", "Gold moon chain"]
+    },
+    "casting": {
+      "intent": "Steady mind, clear words, stable systems",
+      "why": "To channel Mercury sparks into practical outputs",
+      "window_start": "08:00",
+      "window_end": "09:00"
+    },
+    "manifesting": {
+      "intent": "Frictionless pipeline and clean commits",
+      "why": "So small wins stack into momentum",
+      "window_start": "13:00",
+      "window_end": "14:30"
+    },
+    "releasing": {
+      "intent": "Perfectionism and reactive replies",
+      "why": "They scatter focus under today’s aspects",
+      "window_start": "19:30",
+      "window_end": "20:00"
+    },
+    "notes": "If energy is spiky, shorten each window and breathe between steps."
+  },
+
+  "chores": {
+    "energy_of_day": "Capricorn Moon favors structure and tangible progress—pick one ‘visible’ improvement.",
+    "to_do": {
+      "indoor_large": "Tidy and label the project shelf/bin; recycle old drafts.",
+      "indoor_small": "Wipe desk + keyboard; reset cables.",
+      "outdoor": "Quick sweep of entry/porch; check mailbox.",
+      "plants": "Light water check; rotate any leaning plants."
+    },
+    "laundry_focus": "Dark neutrals / linens—fold and put away same day.",
+    "avoid": [
+      "Starting multiple deep cleans at once",
+      "Late-night online disputes or long email chains"
+    ],
+    "shopping_check": "Printer paper, archival sleeves, tea restock, fresh fruit for snacks."
+  },
+
+  "kitchen": {
+    "tea_of_day": "Peppermint + rosemary (clear head, gentle focus)",
+    "breakfast": "Greek yogurt, berries, honey, and granola",
+    "lunch": "Veggie wrap with hummus; apple on the side",
+    "dinner": "Sheet-pan chicken (or tofu), potatoes, and green beans",
+    "snack_prep": "Trail mix jars (nuts, seeds, dark chocolate chips)",
+    "notes": "Hydrate steadily to smooth Moon–Mars edges."
+  },
+
+  "evening_reflection": {
+    "prompt1": "Where did I choose steadiness over speed today, and what did that unlock?",
+    "prompt2": "What did Mercury (messages, ideas, tech) try to teach me under pressure?"
+  }
+}
+

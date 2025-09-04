@@ -22,7 +22,7 @@ This document provides a detailed project plan for Astro Planner, including requ
 
 - Week 1: Project setup, repo, dev tools, basic UI skeleton, PDF export stub
 - Week 2: Account creation (email/Apple/Google), local storage, cloud sync
-- Week 3: Horoscope, Focus, Tasks UI, accessibility, analytics events, feedback form
+- Week 3: Horoscope, Focus, Tasks UI, accessibility (complete), analytics events, feedback form
 - Week 4: API stubs, feature flags, printer-friendly PDF, mobile testing, bugfixes
 - Week 5–6: Polish, test, documentation, user feedback
 
@@ -32,7 +32,7 @@ This document provides a detailed project plan for Astro Planner, including requ
 - Build Today/Week/Month navigation
 - Add PDF export button
 - Add analytics event for app open
-- Test accessibility (font size, contrast)
+- Test accessibility (font size, contrast, labels, roles) (complete)
 
 ---
 
@@ -136,8 +136,8 @@ Below is a day-by-day breakdown for each phase, scheduled Monday–Friday, with 
 ### Phase 1: MVP (6 weeks, 30 workdays)
 
 **Week 1**
-- Mon: Set up repo, folder structure, and install dev tools (4h)
-- Tue: Initialize mobile/web project, basic navigation (4h)
+- Mon: Set up repo, folder structure, and install dev tools (4h) - complete
+- Tue: Initialize mobile/web project, basic navigation (4h) - complete
 - Wed: Create Today/Week/Month UI skeleton (4h)
 - Thu: Add placeholder for PDF export (3h)
 - Fri: Set up version control, push initial commit (2h)

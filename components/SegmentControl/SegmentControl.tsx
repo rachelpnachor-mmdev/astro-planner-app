@@ -24,6 +24,7 @@ export type SegmentControlProps = {
     thumb?: string;
   };
   persistenceKey?: string;
+  testID?: string;
 };
 
 const styles = StyleSheet.create({
@@ -67,6 +68,7 @@ export const SegmentControl: React.FC<SegmentControlProps> = ({
   size = 'md',
   theme = {},
   persistenceKey,
+  testID,
 }) => {
   // Uncontrolled mode: use internal state
   const initialKey =
@@ -88,15 +90,24 @@ export const SegmentControl: React.FC<SegmentControlProps> = ({
     }
   }, [persistenceKey, options]);
 
-
   if (!options || options.length < 2) {
     console.warn('SegmentControl: options must have at least 2 items');
     return null;
   }
 
-  // Controlled mode: use valueKey from props
+  // Error handling for invalid valueKey
   const isControlled = valueKey !== undefined;
-  const selectedKey = isControlled ? valueKey : uncontrolledKey;
+  let selectedKey;
+  if (isControlled) {
+    if (valueKey && !options.some(o => o.key === valueKey)) {
+      console.warn(`SegmentControl: valueKey '${valueKey}' not found in options. Falling back to first option.`);
+      selectedKey = options[0].key;
+    } else {
+      selectedKey = valueKey;
+    }
+  } else {
+    selectedKey = uncontrolledKey;
+  }
 
   const handlePress = (key: string) => {
     if (isControlled) {
@@ -134,6 +145,7 @@ export const SegmentControl: React.FC<SegmentControlProps> = ({
       ]}
       accessibilityRole="tablist"
       accessibilityLabel="Segmented control options"
+      testID={testID || 'SegmentControl'}
     >
       {options.map((option) => {
         const selected = option.key === selectedKey;
@@ -151,6 +163,7 @@ export const SegmentControl: React.FC<SegmentControlProps> = ({
             accessibilityState={{ selected, disabled: !!option.disabled, busy: !!option.loading }}
             accessibilityLabel={option.label + (option.disabled ? ' (disabled)' : option.loading ? ' (loading)' : selected ? ' (selected)' : '')}
             disabled={!!option.disabled || !!option.loading}
+            testID={`${testID || 'SegmentControl'}-item-${option.key}`}
           >
             {option.loading ? (
               <View style={styles.spinner} accessibilityLabel="Loading segment">

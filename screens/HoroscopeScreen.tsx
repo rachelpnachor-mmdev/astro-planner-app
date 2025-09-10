@@ -40,7 +40,7 @@ const styles = StyleSheet.create({
     maxWidth: width * 0.45,
   },
   root: { flex: 1, backgroundColor: '#fff' },
-  container: { alignItems: 'center' },
+  container: { alignItems: 'flex-start' },
   header: { fontSize: 28, fontWeight: 'bold', marginBottom: 16, marginTop: 24, marginLeft: 24 },
   indicatorRow: {
     flexDirection: 'row',
@@ -58,7 +58,7 @@ const styles = StyleSheet.create({
   dotActive: {
     backgroundColor: '#222',
   },
-  section: { justifyContent: 'center', alignItems: 'flex-start', padding: 24 },
+  section: { justifyContent: 'center', alignItems: 'flex-start' },
   sectionTitle: { fontSize: 16, fontWeight: '600' },
 });
 

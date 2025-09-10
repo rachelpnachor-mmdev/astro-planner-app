@@ -1,5 +1,6 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { useState } from 'react';
-import { StyleSheet, Text, TouchableOpacity, View, ActivityIndicator } from 'react-native';
+import { ActivityIndicator, I18nManager, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 export type SegmentOption = {
   key: string;
@@ -13,25 +14,85 @@ export type SegmentControlProps = {
   defaultKey?: string;
   valueKey?: string;
   onChange?: (key: string) => void;
+  size?: 'sm' | 'md' | 'lg';
+  theme?: {
+    background?: string;
+    selectedBackground?: string;
+    border?: string;
+    text?: string;
+    selectedText?: string;
+    thumb?: string;
+  };
+  persistenceKey?: string;
 };
+
+const styles = StyleSheet.create({
+  container: {
+    flexDirection: 'row', // will be overridden for RTL
+    alignSelf: 'flex-start',
+    borderRadius: 999,
+    backgroundColor: '#eee',
+    padding: 4,
+  },
+  button: {
+    marginHorizontal: 2,
+    backgroundColor: 'transparent',
+    borderRadius: 999,
+  },
+  selectedLabel: {
+    fontWeight: 'bold' as const,
+  },
+  disabledButton: {
+    opacity: 0.5,
+  },
+  label: {
+    fontSize: 16,
+    color: '#333',
+  },
+  disabledLabel: {
+    color: '#888',
+  },
+  spinner: {
+    alignItems: 'center' as const,
+    justifyContent: 'center' as const,
+    minWidth: 24,
+  },
+});
 
 export const SegmentControl: React.FC<SegmentControlProps> = ({
   options,
   defaultKey,
   valueKey,
   onChange,
+  size = 'md',
+  theme = {},
+  persistenceKey,
 }) => {
+  // Uncontrolled mode: use internal state
+  const initialKey =
+    defaultKey && options && options.some((o) => o.key === defaultKey)
+      ? defaultKey
+      : options && options.length > 0
+        ? options[0].key
+        : undefined;
+  const [uncontrolledKey, setUncontrolledKey] = useState(initialKey);
+
+  // Load persisted value on mount
+  React.useEffect(() => {
+    if (persistenceKey) {
+      AsyncStorage.getItem(persistenceKey).then((stored) => {
+        if (stored && options.some((o) => o.key === stored)) {
+          setUncontrolledKey(stored);
+        }
+      });
+    }
+  }, [persistenceKey, options]);
+
+
   if (!options || options.length < 2) {
     console.warn('SegmentControl: options must have at least 2 items');
     return null;
   }
-
-  // Uncontrolled mode: use internal state
-  const initialKey =
-    defaultKey && options.some((o) => o.key === defaultKey)
-      ? defaultKey
-      : options[0].key;
-  const [uncontrolledKey, setUncontrolledKey] = useState(initialKey);
 
   // Controlled mode: use valueKey from props
   const isControlled = valueKey !== undefined;
@@ -43,20 +104,52 @@ export const SegmentControl: React.FC<SegmentControlProps> = ({
     } else {
       setUncontrolledKey(key);
       onChange?.(key);
+      if (persistenceKey) {
+        AsyncStorage.setItem(persistenceKey, key);
+      }
     }
   };
 
+  // Sizing tokens
+  const sizeTokens = {
+  sm: { height: 32, fontSize: 14, paddingH: 10, paddingV: 4 },
+  md: { height: 40, fontSize: 16, paddingH: 16, paddingV: 8 },
+  lg: { height: 52, fontSize: 20, paddingH: 24, paddingV: 12 },
+  };
+  const t = sizeTokens[size] || sizeTokens.md;
+
+  // Theme tokens
+  const bg = theme.background || '#eee';
+  const selBg = theme.selectedBackground || '#ccc';
+  const border = theme.border || 'transparent';
+  const text = theme.text || '#333';
+  const selText = theme.selectedText || '#111';
+
   return (
-    <View style={styles.container}>
+    <View
+      style={[
+        styles.container,
+        { backgroundColor: bg, borderRadius: 999, borderColor: border, borderWidth: 1, minHeight: t.height },
+        I18nManager.isRTL ? { flexDirection: 'row-reverse' } : { flexDirection: 'row' }
+      ]}
+      accessibilityRole="tablist"
+      accessibilityLabel="Segmented control options"
+    >
       {options.map((option) => {
         const selected = option.key === selectedKey;
         return (
           <TouchableOpacity
             key={option.key}
-            style={[styles.button, selected && styles.selectedButton, option.disabled && styles.disabledButton]}
+            style={[
+              styles.button,
+              selected && { backgroundColor: selBg },
+              option.disabled && styles.disabledButton,
+              { borderRadius: 999, paddingHorizontal: t.paddingH, paddingVertical: t.paddingV, minHeight: t.height }
+            ]}
             onPress={() => !option.disabled && !option.loading && handlePress(option.key)}
-            accessibilityRole="button"
+            accessibilityRole="tab"
             accessibilityState={{ selected, disabled: !!option.disabled, busy: !!option.loading }}
+            accessibilityLabel={option.label + (option.disabled ? ' (disabled)' : option.loading ? ' (loading)' : selected ? ' (selected)' : '')}
             disabled={!!option.disabled || !!option.loading}
           >
             {option.loading ? (
@@ -64,7 +157,15 @@ export const SegmentControl: React.FC<SegmentControlProps> = ({
                 <ActivityIndicator size="small" color="#888" />
               </View>
             ) : (
-              <Text style={[styles.label, selected && styles.selectedLabel, option.disabled && styles.disabledLabel]}>
+              <Text
+                style={[
+                  styles.label,
+                  { fontSize: t.fontSize, color: selected ? selText : text, textAlign: I18nManager.isRTL ? 'right' : 'left' },
+                  selected && styles.selectedLabel,
+                  option.disabled && styles.disabledLabel
+                ]}
+                allowFontScaling={true}
+              >
                 {option.label}
               </Text>
             )}
@@ -75,41 +176,3 @@ export const SegmentControl: React.FC<SegmentControlProps> = ({
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    flexDirection: 'row',
-    borderRadius: 999,
-    backgroundColor: '#eee',
-    padding: 4,
-    alignSelf: 'center',
-  },
-  button: {
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-    borderRadius: 999,
-    marginHorizontal: 2,
-    backgroundColor: 'transparent',
-  },
-  selectedButton: {
-    backgroundColor: '#ccc',
-  },
-  disabledButton: {
-    opacity: 0.5,
-  },
-  label: {
-    fontSize: 16,
-    color: '#333',
-  },
-  selectedLabel: {
-    fontWeight: 'bold',
-    color: '#111',
-  },
-  disabledLabel: {
-    color: '#888',
-  },
-  spinner: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    minWidth: 24,
-  },
-});

@@ -95,7 +95,6 @@ export default function HoroscopeScreen() {
     });
   };
 
-  import { SegmentControl } from '../components/SegmentControl';
 
   // Determine locked state for each section
   const lockedStates = [

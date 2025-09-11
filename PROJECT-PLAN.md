@@ -22,7 +22,7 @@ This document provides a detailed project plan for Astro Planner, including requ
 
 - Week 1: Project setup, repo, dev tools, basic UI skeleton, PDF export stub
 - Week 2: Account creation (email/Apple/Google), local storage, cloud sync
-- Week 3: Horoscope, Focus, Tasks UI, accessibility (complete), analytics events, feedback form
+- Week 3: Horoscope, Focus, Tasks UI, accessibility (complete), analytics events, feedback form, AI archetype assignment and Daily Core capsule integration
 - Week 4: API stubs, feature flags, printer-friendly PDF, mobile testing, bugfixes
 - Week 5–6: Polish, test, documentation, user feedback
 
@@ -33,15 +33,19 @@ This document provides a detailed project plan for Astro Planner, including requ
 - Add PDF export button
 - Add analytics event for app open
 - Test accessibility (font size, contrast, labels, roles) (complete)
+- Implement sharded memory for AI assistant
+- Add archetype assignment logic to Profile form
+- Integrate AI-generated Daily Core capsule and tone adaptation in Horoscope section
+- Implement basic AI assistant responses (archetype-based, daily capsule)
 
 ---
 
 ### Phase 2: Witch Package
 **Timeframe:** 3–4 weeks (15–20 days)
 
-- Week 1: Witch-type helper UI, onboarding, multi-select styles
-- Week 2: Ritual Kit/Guide logic, daily/weekly inventory, notifications
-- Week 3: Cross-module hooks, paywall, analytics, API integration (Astrology, CMS)
+- Week 1: Witch-type helper UI (AI-powered, personalized onboarding and ritual guidance), multi-select styles
+- Week 2: Ritual Kit/Guide logic (integrates with AI memory for ritual tracking), daily/weekly inventory, notifications
+- Week 3: Cross-module hooks (Meals, Goals), paywall, analytics, API integration (Astrology, CMS), AI context-aware suggestions
 - Week 4: Polish, test, documentation
 
 **Daily Goals Example:**
@@ -55,9 +59,9 @@ This document provides a detailed project plan for Astro Planner, including requ
 ### Phase 3: Meal Planner
 **Timeframe:** 3–4 weeks (15–20 days)
 
-- Week 1: Meal Profile UI, plan generator, shopping list
-- Week 2: Daily meal view, context-aware meals, pantry tracking
-- Week 3: Cross-module hooks, notifications, analytics, API integration (recipes)
+- Week 1: Meal Profile UI, plan generator (AI-personalized suggestions), shopping list
+- Week 2: Daily meal view, context-aware meals (AI uses archetype/memory), pantry tracking
+- Week 3: Cross-module hooks (Kitchen Witch context via AI), notifications, analytics, API integration (recipes), AI context-aware prompts
 - Week 4: Polish, test, documentation
 
 **Daily Goals Example:**
@@ -138,21 +142,24 @@ Below is a day-by-day breakdown for each phase, scheduled Monday–Friday, with 
 **Week 1**
 - Mon: Set up repo, folder structure, and install dev tools (4h) - complete
 - Tue: Initialize mobile/web project, basic navigation (4h) - complete
-- Wed: Create Today/Week/Month UI skeleton (4h)
-- Thu: Add placeholder for PDF export (3h)
-- Fri: Set up version control, push initial commit (2h)
+- Wed: Create Today/Week/Month UI skeleton (4h) - complete
+- Thu: Add placeholder for PDF export (3h) - complete
+- Fri: Set up version control, push initial commit (2h) - complete
 
 **Week 2**
 - Mon: Research and select PDF library/tools (4h)
 - Tue: Implement sign-in screen (email) (4h)
 - Wed: Add Apple/Google sign-in stubs (3h)
 - Thu: Set up local encrypted storage (4h)
+    - Add support for sharded memory for AI assistant
 - Fri: Set up cloud sync (stub) (3h)
 
 **Week 3**
 - Mon: Build Profile (birth data) form (4h)
+    - Implement archetype assignment logic for AI assistant
 - Tue: Add settings page (3h)
 - Wed: Build Horoscope section UI (4h)
+    - Integrate AI-generated Daily Core capsule and tone adaptation
 - Thu: Build Focus section UI (3h)
 - Fri: Build Tasks section UI (3h)
 
@@ -162,6 +169,7 @@ Below is a day-by-day breakdown for each phase, scheduled Monday–Friday, with 
 - Wed: Add feedback form (3h)
 - Thu: Add API stubs (Astrology, Geocoding) (3h)
 - Fri: Implement feature flags for modules (2h)
+    - Implement basic AI assistant responses (archetype-based, daily capsule)
 
 **Week 5**
 - Mon: Build printer-friendly PDF export (4h)

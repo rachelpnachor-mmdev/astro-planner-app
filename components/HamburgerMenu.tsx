@@ -1,8 +1,10 @@
-import React from 'react';
-import { View, Text, TouchableOpacity, Modal, StyleSheet } from 'react-native';
 import { Feather } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
+import React from 'react';
+import { Modal, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 export default function HamburgerMenu({ visible, onClose }: { visible: boolean; onClose: () => void }) {
+  const router = useRouter();
   return (
     <Modal
       visible={visible}
@@ -25,6 +27,17 @@ export default function HamburgerMenu({ visible, onClose }: { visible: boolean; 
           </TouchableOpacity>
           <TouchableOpacity style={styles.item} accessibilityRole="menuitem" accessibilityLabel="Upgrade">
             <Text style={styles.itemText}>Upgrade</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.item}
+            accessibilityRole="menuitem"
+            accessibilityLabel="Export to PDF"
+            onPress={() => {
+              onClose();
+              router.push('/pdf-export');
+            }}
+          >
+            <Text style={styles.itemText}>Export to PDF</Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.closeBtn}

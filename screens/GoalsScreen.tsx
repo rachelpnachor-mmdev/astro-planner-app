@@ -1,17 +1,19 @@
-import React, { useState, useRef } from 'react';
+import CreativeFlow from '@/components/sections/Goals/CreativeFlow';
 import { useNavigation } from '@react-navigation/native';
-import { ScrollView, View, Text, StyleSheet, Dimensions, Button } from 'react-native';
-import DailyGoalTasks from '../components/sections/Goals/DailyGoalTasks';
+import React, { useRef, useState } from 'react';
+import { Button, Dimensions, ScrollView, StyleSheet, Text, View } from 'react-native';
 import Affirmation from '../components/sections/Goals/Affirmation';
+import CareerContext from '../components/sections/Goals/CareerContext';
+import DailyGoalTasks from '../components/sections/Goals/DailyGoalTasks';
 import FamilyRoutines from '../components/sections/Goals/FamilyRoutines';
 import WitchyGoals from '../components/sections/Goals/WitchyGoals';
-import CareerContext from '../components/sections/Goals/CareerContext';
 import { useEntitlement } from '../context/EntitlementContext';
 
 const { width } = Dimensions.get('window');
 
 const SECTION_COMPONENTS = [
   DailyGoalTasks,
+  CreativeFlow,
   Affirmation,
   FamilyRoutines,
   WitchyGoals,
@@ -20,6 +22,7 @@ const SECTION_COMPONENTS = [
 
 const SECTION_LABELS = [
   'Daily Goal Tasks',
+  'Creative Flow (locked unless Goals Package)',
   'Affirmation of the Day',
   'Family Routines (e.g., game night, movie night)',
   'Witchy Goals (themes like Protection, Healing, Abundance)',

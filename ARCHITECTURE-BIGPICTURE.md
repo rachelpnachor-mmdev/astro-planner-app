@@ -3,14 +3,7 @@
 ## 1. Vision & Overall Goals
 
 Astro Planner is a modular, cross-platform (iOS/Android/web) planner app and print service that supports:
-- Personalized daily, weekly, and monthly planning
-- Astrology-driven context and recommendations
-- Modular feature unlocks (Witch, Meals, Chores, Goals, Premium Print)
-- Seamless user experience across free and premium tiers
-- Scalable, privacy-respecting data and analytics
 
-## 2. Feature Sets (by Phase, Unified)
-- **Core/MVP**: Horoscope, Focus, Tasks, PDF export, mobile app, accounts, accessibility, analytics, API stubs, feature flags
 - **Witch Package**: Ritual Kit, Guide, Inventory, multi-style blending, onboarding, notifications, cross-module hooks, paywall, analytics
 - **Meal Planner**: Meal Profile, weekly/daily plans, shopping list, context-aware meals, cross-module hooks, notifications, analytics
 - **Chore Planner**: Household Profile, support system, chore assignment, daily/weekly/monthly views, cross-module hooks, notifications, analytics

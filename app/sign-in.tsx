@@ -1,10 +1,10 @@
-import { Stack } from 'expo-router';
+import { router, Stack } from 'expo-router';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
-    AccessibilityInfo,
+    ActivityIndicator,
     Animated,
-    Easing,
     Image,
+    Keyboard,
     KeyboardAvoidingView,
     Platform,
     ScrollView,
@@ -16,58 +16,219 @@ import {
     View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import LunariaLogo from '../assets/images/lunarialogo.png';
+import { addUser, findUserByEmail, getAllUsers, resetUsers } from '../lib/userStore';
+
+const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: '#0B1220',
+  },
+  card: {
+    backgroundColor: '#141C2B',
+    borderRadius: 16,
+    paddingHorizontal: 16,
+    paddingVertical: 24,
+    borderColor: 'rgba(213,219,232,0.25)',
+    borderWidth: 1,
+  },
+  input: {
+    width: '100%',
+    height: 52,
+    backgroundColor: 'transparent',
+    borderRadius: 16,
+    paddingHorizontal: 16,
+    color: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: 'rgba(213,219,232,0.25)',
+    fontSize: 16,
+  },
+  inputFocused: {
+    borderColor: '#3B82F6',
+    shadowColor: '#3B82F6',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+  },
+  primaryButton: {
+    height: 52,
+    width: '100%',
+    borderRadius: 999,
+    backgroundColor: '#FFFFFF',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  primaryButtonText: {
+    color: '#0B1220',
+    fontWeight: '600',
+    fontSize: 16,
+  },
+  socialButton: {
+    height: 52,
+    width: '100%',
+    borderRadius: 999,
+    backgroundColor: 'transparent',
+    borderWidth: 1,
+    borderColor: '#D5DBE8',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 12,
+  },
+  socialIcon: {
+    fontSize: 20,
+    marginRight: 12,
+    color: '#D5DBE8',
+  },
+  googleIcon: {
+    width: 20,
+    height: 20,
+    marginRight: 12,
+    resizeMode: 'contain',
+  },
+  socialButtonText: {
+    color: '#D5DBE8',
+    fontWeight: '600',
+    fontSize: 16,
+  },
+  errorText: {
+    color: '#EF4444',
+    marginTop: 6,
+  },
+  linkForgot: {
+    color: '#D5DBE8',
+    fontSize: 15,
+    textAlign: 'center',
+    textDecorationLine: 'underline',
+  },
+  linkSignup: {
+    color: '#3B82F6',
+    fontSize: 15,
+    textAlign: 'center',
+    textDecorationLine: 'underline',
+    fontWeight: '600',
+  },
+});
+
+type Errors = { email?: string; password?: string; form?: string };
 
 export default function SignInScreen() {
-  const clamp = (n: number, min: number, max: number) => Math.max(min, Math.min(max, n));
+  useEffect(() => {
+    (async () => {
+      try {
+        const users = await getAllUsers();
+        if (__DEV__) console.log('[SIGNIN] mount users count=', users.length, users);
+      } catch (e) {
+        if (__DEV__) console.log('[SIGNIN] mount users read failed', e);
+      }
+    })();
+  }, []);
+  const { height } = useWindowDimensions();
+  const LunariaLogo = require('../assets/images/lunarialogo.png');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [errors, setErrors] = useState<Errors>({});
+  const [isSubmitting, setSubmitting] = useState(false);
   const [emailFocused, setEmailFocused] = useState(false);
   const [passwordFocused, setPasswordFocused] = useState(false);
+  const [isSignUp, setIsSignUp] = useState(false);
   const passwordRef = useRef<TextInput>(null);
-  const { width, height } = useWindowDimensions();
-  const isShort = height < 700;
-  const logoSize   = clamp(height * 0.18, 112, 160); // ~18% of screen, 112–160px
-  const logoTop    = clamp(height * 0.04, 12, 28);   // 12–28px
-  const logoBottom = clamp(height * 0.03, 12, 24);   // 12–24px
-  const stars = useMemo(() => Array.from({ length: 28 }).map((_, i) => ({
-    left: Math.random() * width,
-    top: Math.random() * height,
-    size: 1 + Math.round(Math.random() * 2),
-    delay: Math.round(Math.random() * 4000),
-    duration: 2000 + Math.round(Math.random() * 2000),
-  })), [width, height]);
-  const opacities = useRef(stars.map(() => new Animated.Value(Math.random()))).current;
-  const [reduceMotion, setReduceMotion] = useState(false);
-
+  const isValidEmail = (v: string): boolean => /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v);
+  const isValidPassword = (pw: string): boolean => pw.trim().length >= 6;
+  const reduceMotion = false;
+  const stars = useMemo(
+    () =>
+      Array.from({ length: 24 }).map(() => ({
+        top: Math.floor(Math.random() * Math.max(480, height)),
+        left: Math.floor(Math.random() * 420),
+        size: 1 + Math.floor(Math.random() * 2),
+        delay: Math.floor(Math.random() * 4000),
+        duration: 2000 + Math.floor(Math.random() * 2000),
+      })),
+    [height]
+  );
+  const opacities = useMemo(() => stars.map(() => new Animated.Value(Math.random())), [stars]);
   useEffect(() => {
-    AccessibilityInfo.isReduceMotionEnabled().then(setReduceMotion);
-  }, []);
+    let loops: Animated.CompositeAnimation[] = [];
+    if (!reduceMotion) {
+      loops = opacities.map((v, i) =>
+        Animated.loop(
+          Animated.sequence([
+            Animated.timing(v, {
+              toValue: 1,
+              duration: stars[i].duration,
+              delay: stars[i].delay,
+              useNativeDriver: true,
+            }),
+            Animated.timing(v, {
+              toValue: 0.3,
+              duration: stars[i].duration,
+              useNativeDriver: true,
+            }),
+          ])
+        )
+      );
+      loops.forEach((loop) => loop.start());
+    }
+    return () => {
+      loops.forEach((loop) => loop.stop && loop.stop());
+    };
+  }, [opacities, reduceMotion, stars]);
 
-  useEffect(() => {
-    if (reduceMotion) return;
-    const loops = opacities.map((v, idx) =>
-      Animated.loop(
-        Animated.sequence([
-          Animated.timing(v, { toValue: 1, duration: stars[idx].duration, easing: Easing.inOut(Easing.quad), useNativeDriver: true, delay: stars[idx].delay }),
-          Animated.timing(v, { toValue: 0.25, duration: stars[idx].duration, easing: Easing.inOut(Easing.quad), useNativeDriver: true }),
-        ])
-      )
-    );
-    loops.forEach(l => l.start());
-    return () => loops.forEach(l => l.stop());
-  }, [reduceMotion, opacities, stars]);
+  const handleSubmit = async (): Promise<void> => {
+    Keyboard.dismiss();
+    setSubmitting(true);
+  let newErrors: Errors = {};
+  if (!isValidEmail(email)) newErrors.email = 'Please enter a valid email address.';
+  if (!isValidPassword(password)) newErrors.password = 'Password must be at least 6 characters.';
+    if (Object.keys(newErrors).length) {
+      setErrors(newErrors);
+      setSubmitting(false);
+      return;
+    }
+    if (isSignUp) {
+      const existing = await findUserByEmail(email);
+      if (existing) {
+        setErrors({ form: 'An account already exists for this email. Try signing in.' });
+        setSubmitting(false);
+        return;
+      }
+      await addUser(email, password);
+      setErrors({ form: 'Account created! You can sign in now.' });
+      setIsSignUp(false);
+      setPassword('');
+      setTimeout(() => {
+        // @ts-expect-error runtime exists
+        (passwordRef?.current as any)?.focus?.();
+      }, 0);
+      setSubmitting(false);
+      return;
+    }
+    const user = await findUserByEmail(email);
+    if (!user) {
+      setErrors({ form: 'No account found for this email. Please sign up.' });
+      setSubmitting(false);
+      return;
+    }
+    if (user.password !== password) {
+      setErrors({ form: 'Incorrect password. Try again or reset your password.' });
+      setSubmitting(false);
+      return;
+    }
+  setErrors({});
+  // @ts-expect-error expo-router path literal
+  router.replace('/(tabs)');
+  return;
+  };
 
   return (
     <SafeAreaView style={styles.safeArea}>
       <Stack.Screen options={{ headerShown: false }} />
-      {/* Animated starfield background */}
       <View pointerEvents="none" style={[StyleSheet.absoluteFill, { backgroundColor: '#0B1220' }]}> 
         {stars.map((s, i) => {
           const style = {
             position: 'absolute' as const,
-            left: s.left,
             top: s.top,
+            left: s.left,
             width: s.size,
             height: s.size,
             borderRadius: s.size / 2,
@@ -99,68 +260,72 @@ export default function SignInScreen() {
               accessibilityLabel="Lunaria logo"
             />
           </View>
-          <View style={[styles.card, { marginTop: -50 }]}>
+          <View style={[styles.card, { marginTop: -50 }]}> 
             <TextInput
-              style={[
-                styles.input,
-                emailFocused && styles.inputFocused,
-              ]}
+              style={[styles.input, emailFocused && styles.inputFocused]}
               placeholder="Email"
               placeholderTextColor="#D5DBE8"
               value={email}
-              onChangeText={setEmail}
-              keyboardType="email-address"
-              autoCapitalize="none"
-              textContentType="emailAddress"
-              accessibilityLabel="Email input"
-              returnKeyType="next"
+              onChangeText={(t) => {
+                setEmail(t);
+                if (errors.email || errors.form)
+                  setErrors((prev) => ({ ...prev, email: undefined, form: undefined }));
+              }}
               onFocus={() => setEmailFocused(true)}
               onBlur={() => setEmailFocused(false)}
-              onSubmitEditing={() => passwordRef.current?.focus()}
+              autoCapitalize="none"
+              keyboardType="email-address"
+              textContentType="emailAddress"
+              returnKeyType="next"
+              onSubmitEditing={() => {
+                (passwordRef.current as any)?.focus?.();
+              }}
+              testID="signin-email"
             />
+            {!!errors.email && <Text style={styles.errorText}>{errors.email}</Text>}
             <View style={{ height: 16 }} />
             <TextInput
               ref={passwordRef}
-              style={[
-                styles.input,
-                passwordFocused && styles.inputFocused,
-              ]}
+              style={[styles.input, passwordFocused && styles.inputFocused]}
               placeholder="Password"
               placeholderTextColor="#D5DBE8"
               value={password}
-              onChangeText={setPassword}
-              secureTextEntry
-              textContentType="password"
-              autoCapitalize="none"
-              accessibilityLabel="Password input"
-              returnKeyType="go"
+              onChangeText={(t) => {
+                setPassword(t);
+                if (errors.password || errors.form)
+                  setErrors((prev) => ({ ...prev, password: undefined, form: undefined }));
+              }}
               onFocus={() => setPasswordFocused(true)}
               onBlur={() => setPasswordFocused(false)}
-              onSubmitEditing={() => {}}
+              secureTextEntry
+              textContentType="password"
+              returnKeyType="go"
+              onSubmitEditing={handleSubmit}
+              testID="signin-password"
             />
+            {!!errors.password && <Text style={styles.errorText}>{errors.password}</Text>}
             <View style={{ height: 16 }} />
             <TouchableOpacity
               style={styles.primaryButton}
-              accessibilityLabel="Sign in button"
-              onPress={() => {}}
+              accessibilityLabel={isSignUp ? "Sign up button" : "Sign in button"}
+              onPress={handleSubmit}
+              disabled={isSubmitting}
+              testID="signin-primary"
             >
-              <Text style={styles.primaryButtonText}>Sign in</Text>
+              <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
+                {isSubmitting ? <ActivityIndicator /> : (
+                  <Text style={styles.primaryButtonText}>{isSignUp ? 'Sign up' : 'Sign in'}</Text>
+                )}
+              </View>
             </TouchableOpacity>
+            {!!errors.form && <Text style={[styles.errorText, { textAlign: 'center', marginTop: 8 }]}>{errors.form}</Text>}
             <View style={{ height: 12 }} />
-            <TouchableOpacity
-              style={styles.socialButton}
-              accessibilityLabel="Continue with Apple"
-              onPress={() => {}}
-            >
+            <TouchableOpacity style={styles.socialButton} accessibilityLabel="Continue with Apple" onPress={() => {}}>
               <Text style={styles.socialIcon}></Text>
               <Text style={styles.socialButtonText}>Continue with Apple</Text>
             </TouchableOpacity>
             <View style={{ height: 12 }} />
-            <TouchableOpacity
-              style={styles.socialButton}
-              accessibilityLabel="Continue with Google"
-              onPress={() => {}}
-            >
+            <TouchableOpacity style={styles.socialButton} accessibilityLabel="Continue with Google" onPress={() => {}}>
               <Image
                 source={require('../assets/images/favicon.png')}
                 style={styles.googleIcon}
@@ -169,160 +334,74 @@ export default function SignInScreen() {
               <Text style={styles.socialButtonText}>Continue with Google</Text>
             </TouchableOpacity>
             <View style={{ height: 16 }} />
-            <TouchableOpacity
-              accessibilityLabel="Forgot password"
-              onPress={() => {}}
-              activeOpacity={0.7}
-            >
+            <TouchableOpacity accessibilityLabel="Forgot password" onPress={() => {}} activeOpacity={0.7}>
               <Text style={styles.linkForgot}>Forgot password?</Text>
             </TouchableOpacity>
             <View style={{ height: 8 }} />
+            {/* Updated sign up link handler for input persistence and focus */}
             <TouchableOpacity
               accessibilityLabel="Sign up"
-              onPress={() => {}}
+              onPress={() => {
+                setErrors({});
+                setIsSignUp(true);
+                setPassword('');
+                if (!email.trim()) {
+                  // @ts-expect-error runtime exists
+                  (emailRef?.current as any)?.focus?.();
+                } else {
+                  (passwordRef?.current as any)?.focus?.();
+                }
+              }}
               activeOpacity={0.7}
             >
               <Text style={styles.linkSignup}>Don’t have an account? Sign up</Text>
             </TouchableOpacity>
+            {__DEV__ && (
+              <View style={{ marginTop: 12 }}>
+                <TouchableOpacity onPress={async () => {
+                  const users = await getAllUsers();
+                  console.log('[SIGNIN] users now:', users);
+                  setErrors({ form: `Users in storage: ${users.length}` });
+                }}>
+                  <Text style={[styles.linkForgot, { textAlign: 'center' }]}>DEV: Dump users</Text>
+                </TouchableOpacity>
+                <TouchableOpacity onPress={async () => {
+                  await resetUsers();
+                  console.log('[SIGNIN] storage cleared');
+                  setErrors({ form: 'DEV: User store cleared.' });
+                }}>
+                  <Text style={[styles.linkForgot, { textAlign: 'center', marginTop: 6 }]}>DEV: Clear users</Text>
+                </TouchableOpacity>
+              </View>
+            )}
+            {isSignUp && (
+              <TouchableOpacity accessibilityLabel="Back to Sign in"
+                onPress={() => { setErrors({}); setIsSignUp(false); }} activeOpacity={0.7}>
+                <Text style={[styles.linkForgot, { textAlign: 'center', marginTop: 8 }]}>Have an account? Sign in</Text>
+              </TouchableOpacity>
+            )}
+            {__DEV__ && (
+              <View style={{ marginTop: 12, gap: 8 }}>
+                <TouchableOpacity onPress={async () => {
+                  const users = await getAllUsers();
+                  console.log('[SIGNIN] users in storage:', users);
+                  setErrors({ form: `Users in storage: ${users.length}` });
+                }}>
+                  <Text style={[styles.linkForgot, { textAlign: 'center' }]}>DEV: Dump users to console</Text>
+                </TouchableOpacity>
+                <TouchableOpacity onPress={async () => {
+                  await resetUsers();
+                  console.log('[SIGNIN] storage cleared');
+                  setErrors({ form: 'DEV: User store cleared.' });
+                }}>
+                  <Text style={[styles.linkForgot, { textAlign: 'center' }]}>DEV: Clear user store</Text>
+                </TouchableOpacity>
+              </View>
+            )}
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: '#0B1220',
-    paddingBottom: 32,
-  },
-  logoContainer: {
-    alignItems: 'center',
-    marginTop: 48,
-    marginBottom: 32,
-  },
-  scrollContainer: {
-    flexGrow: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: 24,
-    gap: 16,
-  },
-  header: {
-    alignItems: 'center',
-    marginBottom: 16,
-  },
-  crescent: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    backgroundColor: '#D5DBE8',
-    marginBottom: 8,
-    shadowColor: '#fff',
-    shadowOffset: { width: 4, height: 0 },
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
-  },
-  wordmark: {
-    color: '#fff',
-    fontSize: 28,
-    fontWeight: '700',
-    letterSpacing: 1.2,
-  },
-  card: {
-    backgroundColor: '#141C2B',
-    borderRadius: 24,
-    padding: 24,
-    maxWidth: 360,
-    width: '100%',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 8,
-    elevation: 3,
-    alignItems: 'center',
-  },
-  input: {
-    height: 52,
-    width: '100%',
-    backgroundColor: '#141C2B',
-    borderRadius: 16,
-    paddingHorizontal: 16,
-    color: '#FFFFFF',
-    borderWidth: 1,
-    borderColor: 'rgba(213,219,232,0.25)',
-    fontSize: 16,
-  },
-  inputFocused: {
-    borderColor: '#3B82F6',
-    shadowColor: '#3B82F6',
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.15,
-    shadowRadius: 6,
-    elevation: 2,
-  },
-  primaryButton: {
-    height: 52,
-    width: '100%',
-    borderRadius: 999,
-    backgroundColor: '#FFFFFF',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  primaryButtonText: {
-    color: '#0B1220',
-    fontWeight: '600',
-    fontSize: 16,
-  },
-  socialButton: {
-    height: 52,
-    width: '100%',
-    borderRadius: 999,
-    borderWidth: 1,
-    borderColor: '#D5DBE8',
-    backgroundColor: 'transparent',
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 12,
-  },
-  socialIcon: {
-    fontSize: 20,
-    marginRight: 12,
-    color: '#D5DBE8',
-  },
-  googleIcon: {
-    width: 20,
-    height: 20,
-    marginRight: 12,
-    resizeMode: 'contain',
-  },
-  socialButtonText: {
-    color: '#D5DBE8',
-    fontWeight: '600',
-    fontSize: 16,
-  },
-  linkForgot: {
-    color: '#D5DBE8',
-    fontSize: 15,
-    textAlign: 'center',
-    textDecorationLine: 'underline',
-  },
-  linkSignup: {
-    color: '#3B82F6',
-    fontSize: 15,
-    textAlign: 'center',
-    textDecorationLine: 'underline',
-    fontWeight: '600',
-  },
-  stars: {
-    ...StyleSheet.absoluteFillObject,
-    zIndex: -1,
-    backgroundColor: 'transparent',
-    borderStyle: 'dotted',
-    borderColor: '#D5DBE8',
-    borderWidth: 0.5,
-    opacity: 0.08,
-  },
-});
+// ...existing code...

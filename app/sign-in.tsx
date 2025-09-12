@@ -7,6 +7,7 @@ import {
     Keyboard,
     KeyboardAvoidingView,
     Platform,
+    SafeAreaView,
     ScrollView,
     StyleSheet,
     Text,
@@ -15,7 +16,7 @@ import {
     useWindowDimensions,
     View,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { setCurrentUser } from '../lib/authSession';
 import { addUser, findUserByEmail, getAllUsers, resetUsers } from '../lib/userStore';
 
 const styles = StyleSheet.create({
@@ -214,10 +215,11 @@ export default function SignInScreen() {
       setSubmitting(false);
       return;
     }
-  setErrors({});
-  // @ts-expect-error expo-router path literal
-  router.replace('/(tabs)');
-  return;
+    setErrors({});
+    await setCurrentUser(email);
+    // @ts-expect-error expo-router path literal
+    router.replace('/(tabs)');
+    return;
   };
 
   return (

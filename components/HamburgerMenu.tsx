@@ -2,6 +2,7 @@ import { Feather } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import React from 'react';
 import { Modal, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { clearCurrentUser } from '../lib/authSession';
 
 export default function HamburgerMenu({ visible, onClose }: { visible: boolean; onClose: () => void }) {
   const router = useRouter();
@@ -38,6 +39,18 @@ export default function HamburgerMenu({ visible, onClose }: { visible: boolean; 
             }}
           >
             <Text style={styles.itemText}>Export to PDF</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.item, { marginTop: 24 }]}
+            accessibilityLabel="Sign out"
+            accessibilityRole="menuitem"
+            onPress={async () => {
+              onClose();
+              await clearCurrentUser();
+              router.replace('/sign-in');
+            }}
+          >
+            <Text style={[styles.itemText, { color: '#EF4444', fontWeight: '600' }]}>Sign out</Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.closeBtn}

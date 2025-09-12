@@ -148,9 +148,9 @@ Below is a day-by-day breakdown for each phase, scheduled Monday–Friday, with 
 
 **Week 2**
 - Mon: Research and select PDF library/tools (4h) - complete
-- Tue: Implement sign-in screen (email) (4h)
-- Wed: Add Apple/Google sign-in stubs (3h)
-- Thu: Set up local encrypted storage (4h)
+- Tue: Implement sign-in screen (email) (4h) - complete
+- Wed: Add Apple/Google sign-in stubs (3h) - complete
+- Thu: Set up local encrypted storage (4h) - in progress. expo-secure-store is installed.
     - Add support for sharded memory for AI assistant
 - Fri: Set up cloud sync (stub) (3h)
 

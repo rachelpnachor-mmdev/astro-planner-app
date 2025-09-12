@@ -1,11 +1,5 @@
-import React from 'react';
-import BottomTabs from '../navigation/BottomTabs';
-import { EntitlementProvider } from '../context/EntitlementContext';
+import { Redirect } from 'expo-router';
 
-export default function App() {
-  return (
-    <EntitlementProvider>
-      <BottomTabs />
-    </EntitlementProvider>
-  );
+export default function IndexScreen() {
+  return <Redirect href="/sign-in" />;
 }

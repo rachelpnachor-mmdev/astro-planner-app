@@ -147,7 +147,7 @@ Below is a day-by-day breakdown for each phase, scheduled Monday–Friday, with 
 - Fri: Set up version control, push initial commit (2h) - complete
 
 **Week 2**
-- Mon: Research and select PDF library/tools (4h)
+- Mon: Research and select PDF library/tools (4h) - complete
 - Tue: Implement sign-in screen (email) (4h)
 - Wed: Add Apple/Google sign-in stubs (3h)
 - Thu: Set up local encrypted storage (4h)

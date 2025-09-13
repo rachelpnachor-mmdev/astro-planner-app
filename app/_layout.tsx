@@ -2,7 +2,13 @@ import { Asset } from 'expo-asset';
 import { Slot } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import React, { useEffect, useState } from 'react';
-import { DevSettings } from 'react-native';
+import { DevSettings, StyleSheet, View } from 'react-native';
+
+import Starfield from '../components/Starfield';
+const styles = StyleSheet.create({
+  root: { flex: 1, backgroundColor: '#0B0E1A' },
+  content: { flex: 1 },
+});
 
 export default function RootLayout() {
   const [assetsReady, setAssetsReady] = useState(false);
@@ -70,5 +76,12 @@ export default function RootLayout() {
   }, [assetsReady]);
 
   if (!assetsReady) return null;
-  return <Slot />;
+  return (
+    <View style={styles.root}>
+      <Starfield density={2} zIndex={-1} />
+      <View style={styles.content}>
+        <Slot />
+      </View>
+    </View>
+  );
 }

@@ -20,7 +20,15 @@ export default function HamburgerMenu({ visible, onClose }: { visible: boolean; 
           accessibilityLabel="Main menu"
         >
           <Text style={styles.title} accessibilityRole="header" accessibilityLabel="Menu">Menu</Text>
-          <TouchableOpacity style={styles.item} accessibilityRole="menuitem" accessibilityLabel="Profile">
+          <TouchableOpacity
+            style={styles.item}
+            accessibilityRole="menuitem"
+            accessibilityLabel="Profile"
+            onPress={() => {
+              onClose();
+              router.push({ pathname: '/profile' });
+            }}
+          >
             <Text style={styles.itemText}>Profile</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.item} accessibilityRole="menuitem" accessibilityLabel="Your Package">

@@ -1,5 +1,5 @@
-import type { MemoryEntry, MemoryTopic } from '../memory/types';
 import { getShardEntries } from '../memory';
+import type { MemoryEntry, MemoryTopic } from '../memory/types';
 import { PushBatch } from './types';
 
 export async function buildPushBatch(

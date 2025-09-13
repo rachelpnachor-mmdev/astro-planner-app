@@ -1,6 +1,6 @@
 import { buildPushBatch } from './build';
 import { loadSyncState, saveSyncState } from './state';
-import { pushViaRemote, pushViaFileSink } from './transport';
+import { pushViaFileSink, pushViaRemote } from './transport';
 import type { PushResult } from './types';
 
 export async function runSyncPush(limitPerTopic = 200): Promise<PushResult & { skipped: boolean }> {

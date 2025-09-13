@@ -1,7 +1,7 @@
 import * as FileSystem from 'expo-file-system';
-import { PROFILE_DIR } from '../memory/paths';
-import { SyncState, SyncCursor } from './types';
 import { getCurrentUser } from '../../authSession';
+import { PROFILE_DIR } from '../memory/paths';
+import { SyncCursor, SyncState } from './types';
 
 const SYNC_STATE = `${PROFILE_DIR}sync.json`;
 const DEVICE_FILE = `${PROFILE_DIR}device.json`;

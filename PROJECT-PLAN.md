@@ -152,7 +152,7 @@ Below is a day-by-day breakdown for each phase, scheduled Monday–Friday, with 
 - Wed: Add Apple/Google sign-in stubs (3h) - complete
 - Thu: Set up local encrypted storage (4h) - complete
     - Add support for sharded memory for AI assistant - complete
-- Fri: Set up cloud sync (stub) (3h)
+- Fri: Set up cloud sync (stub) (3h) - complete
 
 **Week 3**
 - Mon: Build Profile (birth data) form (4h)

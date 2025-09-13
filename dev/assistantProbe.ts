@@ -7,6 +7,8 @@ import { chatReply } from '../lib/ai/assistant/chat';
 import { prepareAssistantMessages } from '../lib/ai/assistant/runtime';
 import { clearAllMemory, exportAllMemory, retrieveMemory, saveMemory } from '../lib/ai/memory';
 import { summarizeWeekly } from '../lib/ai/memory/summarize';
+import { runSyncPush } from '../lib/ai/sync/engine';
+import { loadSyncState, resetSyncState } from '../lib/ai/sync/state';
 export async function capsuleDryRun() {
   try {
     const cap = await buildDailyCapsule();
@@ -107,4 +109,31 @@ export async function summarizeRitualsWeek() {
     console.log('[AI Summary] FAIL', e);
     toast('❌ Summary FAIL — see logs');
   }
+}
+
+export async function syncPushStub() {
+  try {
+    const res = await runSyncPush();
+    console.log('[SYNC PUSH]', res);
+    if (res.skipped) {
+      toast('ℹ️ Sync: nothing to push');
+      return;
+    }
+    if (!res.ok) throw new Error(res.error || 'Push failed');
+    toast(`✅ Sync push OK (${res.topicsPushed.reduce((n,t)=>n+t.count,0)} items)`);
+  } catch (e) {
+    console.log('[SYNC PUSH] FAIL', e);
+    toast('❌ Sync push FAIL — see logs');
+  }
+}
+
+export async function syncShowState() {
+  const st = await loadSyncState();
+  console.log('[SYNC STATE]', st);
+  toast('ℹ️ Sync state logged');
+}
+
+export async function syncResetState() {
+  await resetSyncState();
+  toast('🧹 Sync state reset');
 }

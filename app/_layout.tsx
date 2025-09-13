@@ -48,6 +48,18 @@ export default function RootLayout() {
         const mod = await import('../dev/assistantProbe');
         await mod.capsuleDryRun();
       });
+      DevSettings.addMenuItem('AI ▶ Sync (push stub)', async () => {
+        const mod = await import('../dev/assistantProbe');
+        await mod.syncPushStub();
+      });
+      DevSettings.addMenuItem('AI ▶ Sync ▶ Show state', async () => {
+        const mod = await import('../dev/assistantProbe');
+        await mod.syncShowState();
+      });
+      DevSettings.addMenuItem('AI ▶ Sync ▶ Reset state', async () => {
+        const mod = await import('../dev/assistantProbe');
+        await mod.syncResetState();
+      });
     })();
   }, []);
 

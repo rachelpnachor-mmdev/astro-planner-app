@@ -198,7 +198,6 @@ export default function SignInScreen() {
       setIsSignUp(false);
       setPassword('');
       setTimeout(() => {
-        // @ts-expect-error runtime exists
         (passwordRef?.current as any)?.focus?.();
       }, 0);
       setSubmitting(false);
@@ -217,7 +216,6 @@ export default function SignInScreen() {
     }
     setErrors({});
     await setCurrentUser(email);
-    // @ts-expect-error expo-router path literal
     router.replace('/(tabs)');
     return;
   };

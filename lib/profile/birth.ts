@@ -1,80 +1,134 @@
-import * as FileSystem from 'expo-file-system';
+// Web storage helpers
+import * as SecureStore from 'expo-secure-store';
 
-export type BirthProfile = {
-  fullName: string;
-  dateISO: string;          // YYYY-MM-DD
-  time24?: string | null;   // HH:mm or null
-  timeUnknown: boolean;
-  timezone: string;         // IANA tz
-  locationText: string;
-  createdAt: number;
-  updatedAt: number;
-};
+import {
+  cacheDirectory,
+  deleteAsync,
+  documentDirectory,
+  EncodingType,
+  getInfoAsync,
+  hasFS,
+  makeDirectoryAsync,
+  readAsStringAsync,
+  writeAsStringAsync,
+} from '../utils/fsCompat';
 
-// ---- helpers: all lazy, no side effects at top-level ----
-function getBaseDir(): string | null {
-  // Prefer documentDirectory; fall back to cacheDirectory; may be null on web
-  const fs: any = FileSystem;
-  return fs.documentDirectory ?? fs.cacheDirectory ?? null;
-}
-function getProfileDir(): string | null {
-  const base = getBaseDir();
-  return base ? `${base}profile/` : null;
-}
-function getBirthFile(): string | null {
-  const dir = getProfileDir();
-  return dir ? `${dir}birth.json` : null;
-}
+import type { BirthProfile } from '../types/profile';
 
-async function ensureProfileDir(): Promise<boolean> {
-  const dir = getProfileDir();
-  if (!dir) return false;
-  const info = await FileSystem.getInfoAsync(dir);
-  if (!info.exists) {
-    await FileSystem.makeDirectoryAsync(dir, { intermediates: true });
-  }
-  return true;
-}
-
-// ---- public API ----
-export async function loadBirthProfile(): Promise<BirthProfile | null> {
-  const ok = await ensureProfileDir();
-  if (!ok) return null; // no writable FS (e.g., web) → treat as empty
-  const file = getBirthFile()!;
+async function webSet(key: string, value: string) {
   try {
-    const info = await FileSystem.getInfoAsync(file);
-    if (!info.exists) return null;
-    const raw = await FileSystem.readAsStringAsync(file);
-    return JSON.parse(raw) as BirthProfile;
-  } catch {
-    return null;
+    if (SecureStore.isAvailableAsync && (await SecureStore.isAvailableAsync())) {
+      await SecureStore.setItemAsync(key, value);
+      return;
+    }
+  } catch (e) {
+    console.warn('[birth:webSet] secure-store unavailable:', e);
+  }
+  if (typeof window !== 'undefined' && window.localStorage) {
+    window.localStorage.setItem(key, value);
+    return;
+  }
+  throw new Error('No web storage available');
+}
+
+async function webGet(key: string): Promise<string | null> {
+  try {
+    if (SecureStore.isAvailableAsync && (await SecureStore.isAvailableAsync())) {
+      return await SecureStore.getItemAsync(key);
+    }
+  } catch (e) {
+    console.warn('[birth:webGet] secure-store unavailable:', e);
+  }
+  if (typeof window !== 'undefined' && window.localStorage) {
+    return window.localStorage.getItem(key);
+  }
+  return null;
+}
+
+async function webDelete(key: string) {
+  try {
+    if (SecureStore.isAvailableAsync && (await SecureStore.isAvailableAsync())) {
+      await SecureStore.deleteItemAsync(key);
+      return;
+    }
+  } catch (e) {
+    console.warn('[birth:webDelete] secure-store unavailable:', e);
+  }
+  if (typeof window !== 'undefined' && window.localStorage) {
+    window.localStorage.removeItem(key);
+  }
+}
+export type { BirthProfile } from '../types/profile';
+
+// Silenced: No documentDirectory/cacheDirectory warning. Web fallback is expected and safe.
+
+const PROFILE_DIR = `${(documentDirectory ?? cacheDirectory) as string}lunaria/profile/`;
+const BIRTH_FILE = `${PROFILE_DIR}birth.json`;
+const WEB_BIRTH_KEY = 'lunaria_profile_birth';
+
+async function ensureProfileDir(): Promise<void> {
+  if (!hasFS) return;
+  const base = documentDirectory ?? cacheDirectory;
+  if (!base) throw new Error('No writable FileSystem base dir');
+  const info = await getInfoAsync(PROFILE_DIR);
+  if (!info.exists) {
+    await makeDirectoryAsync(PROFILE_DIR, { intermediates: true });
   }
 }
 
 export async function saveBirthProfile(
-  input: Omit<BirthProfile, 'createdAt' | 'updatedAt'> & Partial<Pick<BirthProfile, 'createdAt'>>
+  payload: Omit<BirthProfile, 'createdAt' | 'updatedAt'>
 ): Promise<BirthProfile> {
-  const ok = await ensureProfileDir();
-  if (!ok) throw new Error('Local file storage unavailable on this platform');
-  const now = Date.now();
-  const prior = await loadBirthProfile();
-  const data: BirthProfile = {
-    ...input,
-    createdAt: prior?.createdAt ?? input.createdAt ?? now,
-    updatedAt: now,
-  };
-  const file = getBirthFile()!;
-  await FileSystem.writeAsStringAsync(file, JSON.stringify(data, null, 2));
-  return data;
+  try {
+    await ensureProfileDir();
+    const now = Date.now();
+    const data: BirthProfile = { ...payload, createdAt: now, updatedAt: now };
+    if (hasFS) {
+      await writeAsStringAsync(BIRTH_FILE, JSON.stringify(data), { encoding: EncodingType.UTF8 });
+    } else {
+      await webSet(WEB_BIRTH_KEY, JSON.stringify(data));
+    }
+    return data;
+  } catch (e) {
+    console.error('[saveBirthProfile] write failed:', e);
+    throw e;
+  }
+}
+
+export async function loadBirthProfile(): Promise<BirthProfile | null> {
+  try {
+    await ensureProfileDir();
+    let raw: string | null = null;
+    if (hasFS) {
+      const info = await getInfoAsync(BIRTH_FILE);
+      if (!info.exists) return null;
+      raw = await readAsStringAsync(BIRTH_FILE, { encoding: EncodingType.UTF8 });
+    } else {
+      raw = await webGet(WEB_BIRTH_KEY);
+    }
+    if (!raw) return null;
+    try {
+      return JSON.parse(raw) as BirthProfile;
+    } catch (e) {
+      console.warn('[loadBirthProfile] JSON parse error, resetting file:', e);
+      return null;
+    }
+  } catch (e) {
+    console.error('[loadBirthProfile] failed:', e);
+    return null;
+  }
 }
 
 export async function clearBirthProfile(): Promise<void> {
-  const ok = await ensureProfileDir();
-  if (!ok) return; // nothing to clear if no FS
-  const file = getBirthFile()!;
-  try { await FileSystem.deleteAsync(file, { idempotent: true }); } catch {}
+  try {
+    await ensureProfileDir();
+    if (hasFS) {
+      await deleteAsync?.(BIRTH_FILE, { idempotent: true } as any);
+    } else {
+      await webDelete(WEB_BIRTH_KEY);
+    }
+  } catch {}
 }
-
 // ---- lightweight validation helpers (unchanged) ----
 export function isValidISODate(s: string): boolean {
   return /^\d{4}-\d{2}-\d{2}$/.test(s) && !Number.isNaN(new Date(s + 'T00:00:00Z').getTime());

@@ -1,13 +1,47 @@
 import * as FileSystem from 'expo-file-system';
+
+import {
+    cacheDirectory,
+    deleteAsync,
+    documentDirectory,
+    getInfoAsync,
+    hasFS,
+    makeDirectoryAsync,
+    readDirectoryAsync,
+} from '../../utils/fsCompat';
+
 import { RECENCY_INDEX, TOPIC_INDEX, TOPIC_SHARD } from './paths';
 import { rankByKeywordAndRecency } from './retrieval';
-import { ensureDirs } from './shards';
-import {
+
+import type {
     MemoryEntry,
     MemoryTopic,
-    RecencyIndex, RetrieveOptions,
-    SaveMemoryInput, TopicIndex, TopicIndexItem
+    RecencyIndex,
+    RetrieveOptions,
+    SaveMemoryInput,
+    TopicIndex,
+    TopicIndexItem,
 } from './types';
+// === Memory directories (account-local) ===
+const MEMORY_DIR = `${(documentDirectory ?? cacheDirectory) as string}lunaria/ai/`;
+const SHARDS_DIR = `${MEMORY_DIR}shards/`;
+const JOURNAL_DIR = `${MEMORY_DIR}journal/`;
+const TOPICS_DIR = `${MEMORY_DIR}topics/`;
+
+export async function ensureDirs(): Promise<void> {
+  if (!hasFS) return;
+  const mk = async (dir: string) => {
+    const info = await getInfoAsync(dir);
+    if (!info.exists) {
+      await makeDirectoryAsync(dir, { intermediates: true });
+    }
+  };
+  await mk(MEMORY_DIR);
+  await mk(SHARDS_DIR);
+  await mk(JOURNAL_DIR);
+  await mk(TOPICS_DIR);
+}
+
 
 function uid() {
   return `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
@@ -153,9 +187,9 @@ export async function exportAllMemory(): Promise<{
 export async function clearAllMemory(): Promise<void> {
   await ensureDirs();
   // wipe shards by recreating dirs
-  const shards = await FileSystem.readDirectoryAsync(TOPICS_DIR);
+  const shards: string[] = await readDirectoryAsync(TOPICS_DIR);
   await Promise.all(
-    shards.map(name => FileSystem.deleteAsync(TOPICS_DIR + name, { idempotent: true }))
+    shards.map((name: string) => deleteAsync?.(TOPICS_DIR + name, { idempotent: true } as any))
   );
   await FileSystem.deleteAsync(TOPIC_INDEX, { idempotent: true });
   await FileSystem.deleteAsync(RECENCY_INDEX, { idempotent: true });

@@ -1,4 +1,26 @@
 import { MemoryEntry } from './types';
+export type RetrievalQuery = {
+  topic?: string;
+  limit?: number;
+  recentMs?: number;
+  text?: string;
+};
+
+export type RetrievalResult = {
+  snippets: { text: string; shard: string; ts?: number }[];
+  sources: string[];
+  debug?: { hitCount: number };
+};
+
+// No-op index builder (ok for dev)
+export async function buildMemoryIndex(_opts?: { force?: boolean }): Promise<void> {
+  return;
+}
+
+// No-op retriever: returns empty result (dev stub)
+export async function retrieveContext(_query: RetrievalQuery): Promise<RetrievalResult> {
+  return { snippets: [], sources: [], debug: { hitCount: 0 } };
+}
 
 // Simple fallback ranker: recency + keyword hits
 export function rankByKeywordAndRecency(

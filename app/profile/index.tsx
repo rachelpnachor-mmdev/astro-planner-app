@@ -1,9 +1,48 @@
 import { router } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import BirthProfileSection from '../../components/BirthProfileSection';
 import StarfieldBackground from '../../components/StarfieldBackground';
 import { getCurrentUser } from '../../lib/authSession';
+import { assignArchetypeProfile, loadArchetypeProfile } from '../../lib/profile/archetype';
+const SHOW_DEV_PANEL =
+  (typeof __DEV__ !== 'undefined' && __DEV__) ||
+  (typeof process !== 'undefined' && process.env?.EXPO_PUBLIC_SHOW_DEV_MENU === '1');
+  const SAMPLE_SIGNS = { rising: 'Aquarius', moon: 'Cancer', mars: 'Aquarius', venus: 'Scorpio' };
+
+  async function devAssignSampleArchetype() {
+    try {
+      const profile = await assignArchetypeProfile(SAMPLE_SIGNS);
+      const t = profile.tone_guidelines;
+      Alert.alert(
+        'Archetype saved',
+        `${profile.archetype}\nA:${t.assertiveness.toFixed(2)}  W:${t.warmth.toFixed(2)}  S:${t.structure.toFixed(2)}  P:${t.playfulness.toFixed(2)}`
+      );
+        console.warn('[LUNARIA][triage] archetype profile saved', profile);
+    } catch (err) {
+      Alert.alert('Error', 'Could not assign archetype profile.');
+        console.warn('[LUNARIA][triage] assign archetype failed', err);
+    }
+  }
+
+  async function devShowArchetype() {
+    try {
+      const profile = await loadArchetypeProfile();
+      if (!profile) {
+        Alert.alert('Archetype', 'No archetype profile found.');
+        return;
+      }
+      const t = profile.tone_guidelines;
+      Alert.alert(
+        'Archetype',
+        `${profile.archetype}\nA:${t.assertiveness.toFixed(2)}  W:${t.warmth.toFixed(2)}  S:${t.structure.toFixed(2)}  P:${t.playfulness.toFixed(2)}`
+      );
+        console.warn('[LUNARIA][triage] archetype profile loaded', profile);
+    } catch (err) {
+      Alert.alert('Error', 'Could not load archetype profile.');
+        console.warn('[LUNARIA][triage] load archetype failed', err);
+    }
+  }
 
 const Colors = { 
   bg: '#0B1220',
@@ -57,6 +96,18 @@ export default function ProfileScreen() {
         )}
 
         <BirthProfileSection />
+
+        {SHOW_DEV_PANEL && (
+          <View style={S.card}>
+            <Text style={{ color: Colors.sub, marginBottom: 6 }}>Dev • Archetype QA</Text>
+            <Pressable onPress={devAssignSampleArchetype} style={{ paddingVertical: 8 }}>
+              <Text style={{ color: Colors.text, fontWeight: '600' }}>Assign Sample (Aquarius ↑ / Cancer ☾)</Text>
+            </Pressable>
+            <Pressable onPress={devShowArchetype} style={{ paddingVertical: 8 }}>
+              <Text style={{ color: Colors.text, fontWeight: '600' }}>Show Current Archetype</Text>
+            </Pressable>
+          </View>
+        )}
       </ScrollView>
     </View>
   );

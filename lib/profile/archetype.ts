@@ -1,17 +1,17 @@
-import * as FileSystem from "expo-file-system";
+import { Directory, File, Paths } from "expo-file-system";
 import { Platform } from "react-native";
 import { computeArchetypeProfile } from "../ai/archetype";
 import type { ArchetypeProfile } from "../types/archetype";
 
-const DIR = `${(FileSystem as any).documentDirectory || ""}profile`;
-const FILE = `${DIR}/archetype.json`;
+
+const PROFILE_DIR = new Directory(Paths.document, "profile");
+const ARCHETYPE_FILE = new File(PROFILE_DIR, "archetype.json");
 const WEB_KEY = "lunaria/profile/archetype";
 
-async function ensureDir(): Promise<void> {
-  if (Platform.OS === "web") return;
+
+function ensureProfileDir(): void {
   try {
-    const info = await FileSystem.getInfoAsync(DIR);
-    if (!info.exists) await FileSystem.makeDirectoryAsync(DIR, { intermediates: true });
+    if (!PROFILE_DIR.exists) PROFILE_DIR.create();
   } catch {
     // silent
   }
@@ -22,8 +22,12 @@ export async function saveArchetypeProfile(data: ArchetypeProfile): Promise<void
     try { window.localStorage.setItem(WEB_KEY, JSON.stringify(data)); } catch {}
     return;
   }
-  await ensureDir();
-  await FileSystem.writeAsStringAsync(FILE, JSON.stringify(data));
+  ensureProfileDir();
+  try {
+    ARCHETYPE_FILE.write(JSON.stringify(data));
+  } catch {
+    // silent
+  }
 }
 
 export async function loadArchetypeProfile(): Promise<ArchetypeProfile | null> {
@@ -34,9 +38,8 @@ export async function loadArchetypeProfile(): Promise<ArchetypeProfile | null> {
     } catch { return null; }
   }
   try {
-    const info = await FileSystem.getInfoAsync(FILE);
-    if (!info.exists) return null;
-    const raw = await FileSystem.readAsStringAsync(FILE);
+    if (!ARCHETYPE_FILE.exists) return null;
+    const raw = ARCHETYPE_FILE.textSync();
     return raw ? (JSON.parse(raw) as ArchetypeProfile) : null;
   } catch {
     return null;

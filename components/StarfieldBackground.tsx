@@ -2,7 +2,6 @@ import React, { memo, useEffect, useMemo } from 'react';
 import { AccessibilityInfo, Animated, Platform, StyleSheet, useWindowDimensions, View } from 'react-native';
 
 const STAR_COUNT = 24;
-const BG_COLOR = '#0B1220';
 const STAR_COLOR = 'rgba(213,219,232,0.9)';
 
 const getReduceMotion = async () => {

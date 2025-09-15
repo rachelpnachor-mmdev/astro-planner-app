@@ -227,7 +227,7 @@ export default function BirthFormScreen() {
 
       Alert.alert('Saved', 'Birth profile saved locally.');
       setDirty(false);
-    } catch (e) {
+    } catch {
       Alert.alert('Error', 'Could not save birth profile.');
     }
   }

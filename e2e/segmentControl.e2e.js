@@ -1,3 +1,5 @@
+/* eslint-env jest */
+/* global device, element, by, expect, beforeAll, describe, it */
 // Detox end-to-end test for SegmentControl
 
 describe('SegmentControl', () => {

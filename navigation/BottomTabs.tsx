@@ -1,14 +1,14 @@
-import React, { useState } from 'react';
+import { Feather, FontAwesome5, Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import HoroscopeScreen from '../screens/HoroscopeScreen';
-import RitualsScreen from '../screens/RitualsScreen';
-import KitchenHomeScreen from '../screens/KitchenHomeScreen';
-import GoalsScreen from '../screens/GoalsScreen';
-import ReflectionsScreen from '../screens/ReflectionsScreen';
-import { Ionicons, MaterialCommunityIcons, FontAwesome5, Feather } from '@expo/vector-icons';
-import { Text, TouchableOpacity } from 'react-native';
+import React, { useState } from 'react';
+import { TouchableOpacity } from 'react-native';
 import CustomTabBar from '../components/CustomTabBar';
 import HamburgerMenu from '../components/HamburgerMenu';
+import GoalsScreen from '../screens/GoalsScreen';
+import HoroscopeScreen from '../screens/HoroscopeScreen';
+import KitchenHomeScreen from '../screens/KitchenHomeScreen';
+import ReflectionsScreen from '../screens/ReflectionsScreen';
+import RitualsScreen from '../screens/RitualsScreen';
 
 const Tab = createBottomTabNavigator();
 

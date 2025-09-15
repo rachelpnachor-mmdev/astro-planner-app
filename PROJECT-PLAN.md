@@ -155,8 +155,8 @@ Below is a day-by-day breakdown for each phase, scheduled Monday–Friday, with 
 - Fri: Set up cloud sync (stub) (3h) - complete
 
 **Week 3**
-- Mon: Build Profile (birth data) form (4h)
-    - Implement archetype assignment logic for AI assistant
+- Mon: Build Profile (birth data) form (4h) - complete
+    - Implement archetype assignment logic for AI assistant - complete
 - Tue: Add settings page (3h)
 - Wed: Build Horoscope section UI (4h)
     - Integrate AI-generated Daily Core capsule and tone adaptation

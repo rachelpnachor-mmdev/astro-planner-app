@@ -1,6 +1,7 @@
 // app/profile/index.tsx
+// NOTE: No SplashScreen logic here. If you see a SplashScreen error, check your app entry point (App.tsx or _layout.tsx) for splash screen calls.
 import { useRouter } from 'expo-router';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
   ActivityIndicator,
   Modal,
@@ -105,7 +106,7 @@ export default function ProfileScreen() {
   const [showChartModal, setShowChartModal] = useState(false);
 
   // Lazy chart view (prevents route crash if chart module has issues)
-  const ChartViewRef = useRef<null | ((props: any) => JSX.Element)>(null);
+  const [ChartView, setChartView] = useState<React.ComponentType<any> | null>(null);
   const [chartLoadError, setChartLoadError] = useState<string | null>(null);
 
   // Dev mode flag
@@ -138,19 +139,31 @@ export default function ProfileScreen() {
     })();
   }, []);
 
-  // Lazy require chart view
+  // Lazy dynamic import for ChartView
   useEffect(() => {
-    if (!showChartModal || ChartViewRef.current) return;
-    try {
-      const mod = require('../../components/astro/ChartView');
-      ChartViewRef.current = mod?.default ?? null;
-      setChartLoadError(ChartViewRef.current ? null : 'ChartView missing default export');
-    } catch (err: any) {
-      setChartLoadError(String(err?.message || err));
-    }
-  }, [showChartModal]);
+    let cancelled = false;
+    if (!showChartModal || ChartView) return;
 
-  const ChartView = ChartViewRef.current;
+    (async () => {
+      try {
+        const mod = await import('../../components/astro/ChartView');
+        const Comp = (mod as any)?.default ?? null;
+        if (!cancelled) {
+          if (typeof Comp === 'function') {
+            setChartView(() => Comp);
+            setChartLoadError(null);
+          } else {
+            setChartLoadError('ChartView missing default export');
+          }
+        }
+      } catch (err: any) {
+        if (!cancelled) setChartLoadError(String(err?.message || err));
+      }
+    })();
+
+    return () => { cancelled = true; };
+  }, [showChartModal, ChartView]);
+
 
   const onCancel = useCallback(() => {
     const r: any = router as any;
@@ -171,8 +184,9 @@ export default function ProfileScreen() {
       const session = await getCurrentUser();
       if (session?.email) {
         const user = await findUserByEmail(session.email);
-        if (user?.profile?.birth?.name) {
-          setUsername(user.profile.birth.name);
+        const up: any = user;
+        if (up?.profile?.birth?.name) {
+          setUsername(up.profile.birth.name as string);
         } else {
           setUsername(session.email);
         }

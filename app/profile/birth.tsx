@@ -205,13 +205,24 @@ export default function BirthFormScreen() {
   // save handler
   async function onSave() {
     try {
-      const payload: Omit<BirthProfile, 'createdAt' | 'updatedAt'> = {
+      // Also save alternate keys for chart compatibility
+      const birthDate = dateISO.trim().slice(0, 10);
+      const birthTime = timeUnknown ? '' : (time24.trim() || '00:00');
+      const place = locationText.trim();
+      const payload: Omit<BirthProfile, 'createdAt' | 'updatedAt'> & {
+        birthDate?: string;
+        birthTime?: string;
+        place?: string;
+      } = {
         fullName: fullName.trim(),
         dateISO: dateISO.trim(),
         time24: timeUnknown ? null : time24.trim(),
         timeUnknown,
         timezone: timezone.trim() || defaultTimezone(),
         locationText: locationText.trim(),
+        birthDate,
+        birthTime,
+        place,
       };
 
       // Save to local profile file

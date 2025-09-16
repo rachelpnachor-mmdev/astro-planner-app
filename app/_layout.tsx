@@ -3,6 +3,7 @@ import { Slot } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import React, { useEffect, useState } from 'react';
 import { DevSettings, StyleSheet, View } from 'react-native';
+import { EntitlementProvider } from '../context/EntitlementContext';
 
 import Starfield from '../components/Starfield';
 const styles = StyleSheet.create({
@@ -77,11 +78,13 @@ export default function RootLayout() {
 
   if (!assetsReady) return null;
   return (
-    <View style={styles.root}>
-      <Starfield density={2} zIndex={-1} />
-      <View style={styles.content}>
-        <Slot />
+    <EntitlementProvider>
+      <View style={styles.root}>
+        <Starfield density={2} zIndex={-1} />
+        <View style={styles.content}>
+          <Slot />
+        </View>
       </View>
-    </View>
+    </EntitlementProvider>
   );
 }

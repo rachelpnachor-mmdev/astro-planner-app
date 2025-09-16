@@ -165,6 +165,7 @@ Below is a day-by-day breakdown for each phase, scheduled Monday–Friday, with 
 
 **Week 4**
 - Mon: Add accessibility features (font size, contrast) (3h)
+ - Adjust business logic for user onboarding pages to save upfront settings.
 - Tue: Add analytics event for app open (2h)
 - Wed: Add feedback form (3h)
 - Thu: Add API stubs (Astrology, Geocoding) (3h)

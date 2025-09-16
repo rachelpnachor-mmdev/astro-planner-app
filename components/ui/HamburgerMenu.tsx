@@ -1,6 +1,7 @@
 import { assignArchetypeProfile, loadArchetypeProfile } from "@/lib/profile/archetype";
 import React, { useEffect } from "react";
 import { Alert, Pressable, Text, View } from "react-native";
+import { useRouter } from 'expo-router';
 const SHOW_DEV_MENU =
   (typeof __DEV__ !== "undefined" && __DEV__) ||
   (typeof process !== "undefined" && process.env?.EXPO_PUBLIC_SHOW_DEV_MENU === "1");
@@ -46,6 +47,7 @@ async function devShowArchetype() {
 }
 
 export default function HamburgerMenu() {
+  const router = useRouter();
   useEffect(() => {
    
   console.warn("[LUNARIA][triage] HamburgerMenu mounted", { __DEV__, SHOW_DEV_MENU });
@@ -55,6 +57,9 @@ export default function HamburgerMenu() {
       {/* ...existing menu items... */}
       <Pressable style={{ paddingVertical: 12 }} onPress={() => {/* navigate to profile */}}>
         <Text style={{ fontSize: 16 }}>Profile</Text>
+      </Pressable>
+      <Pressable style={{ paddingVertical: 12 }} onPress={() => router.push('/settings' as any)}>
+        <Text>Settings</Text>
       </Pressable>
       {/* DEV-only actions */}
       {SHOW_DEV_MENU && (

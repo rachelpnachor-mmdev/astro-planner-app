@@ -1,10 +1,14 @@
 import { router } from 'expo-router';
-import { useEffect, useState } from 'react';
-import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
-import BirthProfileSection from '../../components/BirthProfileSection';
+import React, { useEffect, useState } from 'react';
+import { ActivityIndicator, Alert, Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+
+import ChartView from '../../components/astro/ChartView';
 import StarfieldBackground from '../../components/StarfieldBackground';
+import { useBirthChart } from '../../lib/astro/useBirthChart';
 import { getCurrentUser } from '../../lib/authSession';
 import { assignArchetypeProfile, loadArchetypeProfile } from '../../lib/profile/archetype';
+import { loadBirthProfile } from '../../lib/profile/birth';
+import type { BirthProfile } from '../../lib/types/profile';
 const SHOW_DEV_PANEL =
   (typeof __DEV__ !== 'undefined' && __DEV__) ||
   (typeof process !== 'undefined' && process.env?.EXPO_PUBLIC_SHOW_DEV_MENU === '1');
@@ -18,10 +22,9 @@ const SHOW_DEV_PANEL =
         'Archetype saved',
         `${profile.archetype}\nA:${t.assertiveness.toFixed(2)}  W:${t.warmth.toFixed(2)}  S:${t.structure.toFixed(2)}  P:${t.playfulness.toFixed(2)}`
       );
-        console.warn('[LUNARIA][triage] archetype profile saved', profile);
     } catch (err) {
       Alert.alert('Error', 'Could not assign archetype profile.');
-        console.warn('[LUNARIA][triage] assign archetype failed', err);
+      console.warn('[LUNARIA][triage] assign archetype failed', err);
     }
   }
 
@@ -59,10 +62,30 @@ const S = StyleSheet.create({
   toolbar: { flexDirection: 'row', justifyContent: 'flex-end', alignItems: 'center', marginTop: 4, marginBottom: 6 },
   cancelLink: { color: Colors.text, fontWeight: '600', paddingHorizontal: 8, paddingVertical: 6 },
   card: { backgroundColor: Colors.card, borderRadius: 12, padding: 16, borderWidth: 1, borderColor: Colors.border },
+  cardTopRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 8,
+  },
+  cardLinkWrap: { paddingTop: 8 },
+  cardLink: { color: '#80d0ff', fontSize: 15, fontWeight: '500' },
+  labelText: { color: Colors.sub, marginBottom: 6, fontWeight: '600' },
+  value: { color: Colors.text },
 });
 
 export default function ProfileScreen() {
   const [email, setEmail] = useState<string | null>(null);
+  const { chart, loading } = useBirthChart();
+  const [showChartModal, setShowChartModal] = useState(false);
+  const [birthProfile, setBirthProfile] = useState<BirthProfile | null>(null);
+
+  useEffect(() => {
+    (async () => {
+      const bp = await loadBirthProfile();
+      setBirthProfile(bp);
+    })();
+  }, []);
 
   useEffect(() => {
     (async () => {
@@ -95,7 +118,35 @@ export default function ProfileScreen() {
           </View>
         )}
 
-        <BirthProfileSection />
+
+        {/* Chart preview removed; open modal instead via the button below */}
+        <View style={S.card}>
+          <View style={S.cardTopRow}>
+          <Text style={S.title}>Birth Profile</Text>
+          <Pressable onPress={() => router.push('/profile/birth')} accessibilityRole="button">
+            <Text style={S.cardLink}>Edit</Text>
+          </Pressable>
+        </View>
+        {/* Render birth profile fields or empty state */}
+        <Text style={S.labelText}>
+          <Text style={S.value}>Name:</Text> <Text style={S.value}>{birthProfile?.fullName ?? '—'}</Text>
+        </Text>
+        <Text style={S.labelText}>
+          <Text style={S.value}>Birth date:</Text> <Text style={S.value}>{birthProfile?.dateISO ?? '—'}</Text>
+        </Text>
+        <Text style={S.labelText}>
+          <Text style={S.value}>Birth time:</Text> <Text style={S.value}>{birthProfile?.timeUnknown ? 'Unknown' : birthProfile?.time24 ?? '—'}</Text>
+        </Text>
+        <Text style={S.labelText}>
+          <Text style={S.value}>Timezone:</Text> <Text style={S.value}>{birthProfile?.timezone ?? '—'}</Text>
+        </Text>
+        <Text style={S.labelText}>
+          <Text style={S.value}>Birthplace:</Text> <Text style={S.value}>{birthProfile?.locationText ?? '—'}</Text>
+        </Text>
+        <Pressable onPress={() => setShowChartModal(true)} accessibilityRole="button" style={S.cardLinkWrap}>
+          <Text style={S.cardLink}>View Birth Chart</Text>
+        </Pressable>
+      </View>
 
         {SHOW_DEV_PANEL && (
           <View style={S.card}>
@@ -109,6 +160,33 @@ export default function ProfileScreen() {
           </View>
         )}
       </ScrollView>
+      {/* Modal for full-screen birth chart */}
+      <Modal
+        visible={showChartModal}
+        animationType="slide"
+        presentationStyle="fullScreen"
+        onRequestClose={() => setShowChartModal(false)}
+      >
+        <View style={modalStyles.container}>
+          <StarfieldBackground />
+          <View style={modalStyles.topBar}>
+            <Pressable onPress={() => setShowChartModal(false)} accessibilityRole="button">
+              <Text style={modalStyles.closeText}>Done</Text>
+            </Pressable>
+          </View>
+          <ScrollView contentContainerStyle={modalStyles.content}>
+            {loading || !chart ? <ActivityIndicator /> : <ChartView chart={chart} />}
+          </ScrollView>
+        </View>
+      </Modal>
     </View>
   );
 }
+const modalStyles = StyleSheet.create({
+  container: { flex: 1, backgroundColor: '#0b0f14' },
+  topBar: { paddingHorizontal: 16, paddingTop: 16, paddingBottom: 8, alignItems: 'flex-end' },
+  closeText: { color: '#80d0ff', fontSize: 16, fontWeight: '600' },
+  content: { padding: 16, gap: 12 },
+  viewLink: { paddingTop: 8 },
+  viewLinkText: { color: '#80d0ff', fontSize: 15 },
+});

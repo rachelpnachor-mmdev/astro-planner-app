@@ -1,5 +1,5 @@
-export type AstrologySystem = 'western' | 'vedic';
-export type HouseSystem = 'whole_sign' | 'placidus';
+import type { AstrologySystem, HouseSystem } from '../constants/astrology';
+export type { AstrologySystem, HouseSystem } from '../constants/astrology';
 
 export type Settings = {
   features: {

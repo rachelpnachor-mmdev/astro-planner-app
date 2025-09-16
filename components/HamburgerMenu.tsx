@@ -1,4 +1,4 @@
-import { assignArchetypeProfile, loadArchetypeProfile } from "@/lib/profile/archetype";
+// ...existing code...
 import { Feather } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import React from 'react';
@@ -6,43 +6,6 @@ import { Modal, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { clearCurrentUser } from '../lib/authSession';
 
 export default function HamburgerMenu({ visible, onClose }: { visible: boolean; onClose: () => void }) {
-  const SHOW_DEV_MENU =
-    (typeof __DEV__ !== "undefined" && __DEV__) ||
-    (typeof process !== "undefined" && process.env?.EXPO_PUBLIC_SHOW_DEV_MENU === "1");
-
-  const SAMPLE_SIGNS = { rising: "Aquarius", moon: "Cancer", mars: "Aquarius", venus: "Scorpio" };
-
-  async function devAssignSampleArchetype() {
-    try {
-      const profile = await assignArchetypeProfile(SAMPLE_SIGNS);
-      const t = profile.tone_guidelines;
-      alert(
-        `Archetype saved\n${profile.archetype}\nA:${t.assertiveness.toFixed(2)}  W:${t.warmth.toFixed(2)}  S:${t.structure.toFixed(2)}  P:${t.playfulness.toFixed(2)}`
-      );
-      console.warn("[LUNARIA][triage] archetype profile saved", profile);
-    } catch (err) {
-      alert("Error: Could not assign archetype profile.");
-      console.warn("[LUNARIA][triage] assign archetype failed", err);
-    }
-  }
-
-  async function devShowArchetype() {
-    try {
-      const profile = await loadArchetypeProfile();
-      if (!profile) {
-        alert("Archetype: No archetype profile found.");
-        return;
-      }
-      const t = profile.tone_guidelines;
-      alert(
-        `Archetype\n${profile.archetype}\nA:${t.assertiveness.toFixed(2)}  W:${t.warmth.toFixed(2)}  S:${t.structure.toFixed(2)}  P:${t.playfulness.toFixed(2)}`
-      );
-      console.warn("[LUNARIA][triage] archetype profile loaded", profile);
-    } catch (err) {
-      alert("Error: Could not load archetype profile.");
-      console.warn("[LUNARIA][triage] load archetype failed", err);
-    }
-  }
   const router = useRouter();
   return (
     <Modal

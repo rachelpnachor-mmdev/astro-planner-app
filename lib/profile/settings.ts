@@ -1,12 +1,13 @@
 import * as SecureStore from 'expo-secure-store';
 import { Platform } from 'react-native';
+import { bus, EVENTS } from '../events/bus';
 import type { Settings } from '../types/settings';
 
 const SETTINGS_KEY = 'lunaria/settings';
 
 export const defaultSettings: Settings = {
   features: { dailyCore: true, aiAssistant: true },
-  astrology: { system: 'western', houseSystem: 'whole_sign' },
+  astrology: { system: 'western_tropical', houseSystem: 'whole_sign' },
   notifications: { dailyCoreReminder: false },
   updatedAt: Date.now(),
 };
@@ -67,6 +68,7 @@ export async function saveSettings(next: Settings): Promise<void> {
   // dev log (single, clearly-tagged)
    
   console.log('[LUNARIA][settings] saved', { updatedAt: payload.updatedAt });
+  bus.emit(EVENTS.SETTINGS_CHANGED, { settings: payload });
 }
 
 type SettingsPatch = Partial<Settings> & {

@@ -2,7 +2,6 @@
 import React from 'react';
 import { StyleSheet, useWindowDimensions, View } from 'react-native';
 import Svg, { Circle, G, Line, Text as SvgText } from 'react-native-svg';
-
 import { ASPECT_COLORS, computeAspects, type Aspect } from '../../lib/astro/aspects';
 import type { BirthChart } from '../../lib/astro/types';
 

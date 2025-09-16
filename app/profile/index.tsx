@@ -1,6 +1,6 @@
 // app/profile/index.tsx
 import { useRouter } from 'expo-router';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   Modal,
@@ -8,77 +8,191 @@ import {
   ScrollView,
   StyleSheet,
   Text,
-  useWindowDimensions,
   View,
 } from 'react-native';
 
-import BirthChartTable from '../../components/astro/BirthChartTable';
-import BirthChartWheel from '../../components/astro/BirthChartWheel';
 import StarfieldBackground from '../../components/StarfieldBackground';
 import { useBirthChart } from '../../lib/astro/useBirthChart';
+import { getCurrentUser } from '../../lib/authSession';
+import { assignArchetypeProfile, loadArchetypeProfile } from '../../lib/profile/archetype';
 import { loadBirthProfile } from '../../lib/profile/birth';
+import { findUserByEmail } from '../../lib/userStore';
 
-// Hide native header
+// Hide native header on profile-like pages.
 export const options = { headerShown: false, title: 'Profile' };
 
 type BirthProfile = {
   name?: string;
-  birthDate?: string;     // 'YYYY-MM-DD'
-  birthTime?: string;     // 'HH:mm'
-  timezone?: string;      // IANA
-  birthplace?: string;    // free text
-  // tolerate alt keys too (so this file stays robust)
-  timeZone?: string;
-  tz?: string;
-  date?: string;
-  time?: string;
+  birthDate?: string;   // 'YYYY-MM-DD'
+  birthTime?: string;   // 'HH:mm'
+  timezone?: string;    // IANA tz id
+  birthplace?: string;
+  // tolerate alt keys for older saves
+  date?: string; time?: string; timeZone?: string; tz?: string;
 };
+
+// ---------- helpers (top-level only) ----------
+type AnyObj = Record<string, any>;
+const str = (v: unknown) => (typeof v === 'string' ? v : '');
+const joinComma = (...parts: (string | undefined)[]) =>
+  parts.filter((p) => !!p && p.trim().length > 0).join(', ');
+const isoParts = (iso?: string) => {
+  if (!iso) return { date: '', time: '' };
+  const d = new Date(iso);
+  if (isNaN(d.getTime())) return { date: '', time: '' };
+  const pad = (n: number) => (n < 10 ? `0${n}` : `${n}`);
+  const y = d.getFullYear();
+  const m = pad(d.getMonth() + 1);
+  const dd = pad(d.getDate());
+  const hh = pad(d.getHours());
+  const mm = pad(d.getMinutes());
+  return { date: `${y}-${m}-${dd}`, time: `${hh}:${mm}` };
+};
+function normalizeBirthProfile(raw: unknown): BirthProfile {
+  const p = (raw ?? {}) as AnyObj;
+  const fullName =
+    str(p.name) ||
+    str(p.fullName) ||
+    [str(p.firstName), str(p.lastName)].filter(Boolean).join(' ').trim() ||
+    str(p?.profile?.name) ||
+    str(p?.birth?.name);
+
+  const dateISO = str(p.dateISO) || str(p?.birth?.dateISO);
+  let date = str(p.birthDate) || str(p.date) || str(p.dob) || str(p?.birth?.date) || '';
+  let time = str(p.birthTime) || str(p.time) || str(p?.birth?.time) || '';
+  if ((!date || !time) && dateISO) {
+    const parts = isoParts(dateISO);
+    if (!date) date = parts.date;
+    if (!time) time = parts.time;
+  }
+
+  const timezone =
+    str(p.timezone) || str(p.timeZone) || str(p.tz) ||
+    str(p?.birth?.timezone) || str(p?.birth?.timeZone) || str(p?.birth?.tz);
+
+  const birthplace =
+    str(p.birthplace) ||
+    str(p.place) ||
+    str(p.locationText) ||
+    str(p?.birth?.birthplace) ||
+    str(p?.location?.name) ||
+    joinComma(str(p.city), str(p.state || p.region), str(p.country));
+
+  return {
+    name: fullName || undefined,
+    birthDate: date || undefined,
+    birthTime: time || undefined,
+    timezone: timezone || undefined,
+    birthplace: birthplace || undefined,
+    // keep tolerant alternates (no harm if present)
+    date: str(p.date) || undefined,
+    time: str(p.time) || undefined,
+    timeZone: str(p.timeZone) || undefined,
+    tz: str(p.tz) || undefined,
+  };
+}
+
+// ------------------------------------------------
 
 export default function ProfileScreen() {
   const router = useRouter();
+
+  // Birth profile state
   const [profile, setProfile] = useState<BirthProfile | null>(null);
   const [loadingProfile, setLoadingProfile] = useState(true);
 
-  // Birth chart modal state
+  // Chart modal state
   const [showChartModal, setShowChartModal] = useState(false);
-  const pagerRef = useRef<ScrollView>(null);
-  const [tab, setTab] = useState(0);
-  const { width: pageWidth } = useWindowDimensions();
 
-  // Chart data (hook computes from saved profile + settings)
+  // Lazy chart view (prevents route crash if chart module has issues)
+  const ChartViewRef = useRef<null | ((props: any) => JSX.Element)>(null);
+  const [chartLoadError, setChartLoadError] = useState<string | null>(null);
+
+  // Dev mode flag
+  const SHOW_DEV_MENU =
+    (typeof __DEV__ !== 'undefined' && __DEV__) ||
+    (typeof process !== 'undefined' && process.env?.EXPO_PUBLIC_SHOW_DEV_MENU === '1');
+
+  // Compute chart (hook is already guarded)
   const { chart, loading: loadingChart } = useBirthChart();
 
+  // Load birth profile from user store (if logged in) or secure store; then normalize
   useEffect(() => {
     (async () => {
-      try {
-        const p = await loadBirthProfile();
-        setProfile(p ?? {});
-      } finally {
-        setLoadingProfile(false);
+      const session = await getCurrentUser();
+      let birthProfile: unknown = null;
+      if (session?.email) {
+        const user = await findUserByEmail(session.email);
+        birthProfile = user?.profile?.birth ?? null;
+      }
+      if (!birthProfile) {
+        try {
+          birthProfile = await loadBirthProfile();
+        } catch {}
+      }
+      const normalized = normalizeBirthProfile(birthProfile);
+       
+      console.log('[LUNARIA][profile] normalized birth profile', normalized);
+      setProfile(normalized);
+      setLoadingProfile(false);
+    })();
+  }, []);
+
+  // Lazy require chart view
+  useEffect(() => {
+    if (!showChartModal || ChartViewRef.current) return;
+    try {
+      const mod = require('../../components/astro/ChartView');
+      ChartViewRef.current = mod?.default ?? null;
+      setChartLoadError(ChartViewRef.current ? null : 'ChartView missing default export');
+    } catch (err: any) {
+      setChartLoadError(String(err?.message || err));
+    }
+  }, [showChartModal]);
+
+  const ChartView = ChartViewRef.current;
+
+  const onCancel = useCallback(() => {
+    const r: any = router as any;
+    const canGoBack = typeof r?.canGoBack === 'function' ? r.canGoBack() : false;
+    if (canGoBack && typeof r?.back === 'function') r.back();
+    else router.replace('/');
+  }, [router]);
+
+  const onEditBirthProfile = useCallback(() => {
+    // Route directly to /profile/birth; cast silences expo-router type union if needed.
+    router.push('/profile/birth' as any);
+  }, [router]);
+
+  // Username tile
+  const [username, setUsername] = useState<string>('—');
+  useEffect(() => {
+    (async () => {
+      const session = await getCurrentUser();
+      if (session?.email) {
+        const user = await findUserByEmail(session.email);
+        if (user?.profile?.birth?.name) {
+          setUsername(user.profile.birth.name);
+        } else {
+          setUsername(session.email);
+        }
       }
     })();
   }, []);
 
-  const onCancel = () => {
-    // history-aware cancel
-    // @ts-expect-error expo-router may expose canGoBack at runtime
-    if ((router as any)?.canGoBack?.()) router.back();
-    else router.replace('/');
-  };
-
-  // Safe accessors for display (tolerate slightly different keys)
-  const name = profile?.name || '';
-  const birthDate = profile?.birthDate || profile?.date || '';
-  const birthTime = profile?.birthTime || profile?.time || '';
-  const timezone = profile?.timezone || profile?.timeZone || profile?.tz || '';
-  const birthplace = profile?.birthplace || '';
+  // Normalize fields for display (never hide the rows)
+  const name = profile?.name || '—';
+  const birthDate = profile?.birthDate || profile?.date || '—';
+  const birthTime = profile?.birthTime || profile?.time || '—';
+  const timezone = profile?.timezone || profile?.timeZone || profile?.tz || '—';
+  // Use normalization logic for birthplace display
+  const birthplace = (profile && normalizeBirthProfile(profile).birthplace) || '—';
 
   return (
     <View style={styles.root}>
       <StarfieldBackground />
-
       <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-        {/* Top bar */}
+        {/* Top bar: Title + Cancel (right) */}
         <View style={styles.topBar}>
           <Text style={styles.h1}>Profile</Text>
           <Pressable onPress={onCancel} accessibilityRole="button">
@@ -86,14 +200,19 @@ export default function ProfileScreen() {
           </Pressable>
         </View>
 
+        {/* Username tile */}
+        <View style={styles.card}>
+          <View style={styles.cardTopRow}>
+            <Text style={styles.cardTitle}>Username</Text>
+          </View>
+          <Row label="Username" value={username} />
+        </View>
+
         {/* Birth Profile card */}
         <View style={styles.card}>
           <View style={styles.cardTopRow}>
             <Text style={styles.cardTitle}>Birth Profile</Text>
-            <Pressable
-              onPress={() => router.push('/profile/edit')}
-              accessibilityRole="button"
-            >
+            <Pressable onPress={onEditBirthProfile} accessibilityRole="button">
               <Text style={styles.cardLink}>Edit</Text>
             </Pressable>
           </View>
@@ -102,11 +221,11 @@ export default function ProfileScreen() {
             <ActivityIndicator />
           ) : (
             <>
-              {name ? <Row label="Name" value={name} /> : null}
-              {birthDate ? <Row label="Birth date" value={birthDate} /> : null}
-              {birthTime ? <Row label="Birth time" value={birthTime} /> : null}
-              {timezone ? <Row label="Timezone" value={timezone} /> : null}
-              {birthplace ? <Row label="Birthplace" value={birthplace} /> : null}
+              <Row label="Name" value={name} />
+              <Row label="Birth date" value={birthDate} />
+              <Row label="Birth time" value={birthTime} />
+              <Row label="Timezone" value={timezone} />
+              <Row label="Birthplace" value={birthplace} />
 
               <Pressable
                 onPress={() => setShowChartModal(true)}
@@ -119,7 +238,62 @@ export default function ProfileScreen() {
           )}
         </View>
 
-        {/* You can keep other cards (Account, Dev/QA) below as separate <View style={styles.card}> blocks */}
+        {/* Developer Tools (Archetype) */}
+        {SHOW_DEV_MENU && (
+          <View style={styles.card}>
+            <View style={styles.cardTopRow}>
+              <Text style={styles.cardTitle}>Developer Tools</Text>
+            </View>
+            <Pressable
+              style={{ paddingVertical: 8 }}
+              onPress={async () => {
+                try {
+                  const SAMPLE_SIGNS = { rising: 'Aquarius', moon: 'Cancer', mars: 'Aquarius', venus: 'Scorpio' };
+                  const ap = await assignArchetypeProfile(SAMPLE_SIGNS);
+                   
+                  console.log('[DEV][profile] Assign Archetype selected', ap);
+                  alert(
+                    `Archetype saved: ${ap.archetype}\n` +
+                    `A:${ap.tone_guidelines.assertiveness.toFixed(2)} ` +
+                    `W:${ap.tone_guidelines.warmth.toFixed(2)} ` +
+                    `S:${ap.tone_guidelines.structure.toFixed(2)} ` +
+                    `P:${ap.tone_guidelines.playfulness.toFixed(2)}`
+                  );
+                } catch {
+                  alert('Error: Could not assign archetype profile.');
+                }
+              }}
+            >
+              <Text style={{ color: '#80d0ff', fontSize: 15 }}>Assign Archetype Profile (Sample)</Text>
+            </Pressable>
+            <Pressable
+              style={{ paddingVertical: 8 }}
+              onPress={async () => {
+                try {
+                  const ap = await loadArchetypeProfile();
+                   
+                  console.log('[DEV][profile] Load Archetype Profile selected', ap);
+                  if (!ap) {
+                    alert('No archetype profile found.');
+                    return;
+                  }
+                  const t = ap.tone_guidelines;
+                  alert(
+                    `Archetype: ${ap.archetype}\n` +
+                    `A:${t.assertiveness.toFixed(2)} ` +
+                    `W:${t.warmth.toFixed(2)} ` +
+                    `S:${t.structure.toFixed(2)} ` +
+                    `P:${t.playfulness.toFixed(2)}`
+                  );
+                } catch {
+                  alert('Error: Could not load archetype profile.');
+                }
+              }}
+            >
+              <Text style={{ color: '#80d0ff', fontSize: 15 }}>Load Archetype Profile</Text>
+            </Pressable>
+          </View>
+        )}
       </ScrollView>
 
       {/* Birth Chart Modal */}
@@ -138,56 +312,22 @@ export default function ProfileScreen() {
             </Pressable>
           </View>
 
-          {/* Tabs */}
-          <View style={modalStyles.tabs}>
-            <Pressable
-              onPress={() => {
-                setTab(0);
-                pagerRef.current?.scrollTo({ x: 0, animated: true });
-              }}
-              style={[modalStyles.tab, tab === 0 && modalStyles.tabActive]}
-            >
-              <Text style={modalStyles.tabText}>Chart</Text>
-            </Pressable>
-            <Pressable
-              onPress={() => {
-                setTab(1);
-                pagerRef.current?.scrollTo({ x: pageWidth, animated: true });
-              }}
-              style={[modalStyles.tab, tab === 1 && modalStyles.tabActive]}
-            >
-              <Text style={modalStyles.tabText}>Table</Text>
-            </Pressable>
+          <View style={{ flex: 1, paddingTop: 4 }}>
+            {!ChartView ? (
+              chartLoadError ? (
+                <View style={modalStyles.center}>
+                  <Text style={modalStyles.errorText}>Couldn’t load chart view.</Text>
+                  <Text style={modalStyles.errorSub}>{chartLoadError}</Text>
+                </View>
+              ) : (
+                <View style={modalStyles.center}>
+                  <ActivityIndicator />
+                </View>
+              )
+            ) : (
+              <ChartView chart={chart} loading={loadingChart} />
+            )}
           </View>
-
-          {/* Horizontal pager */}
-          <ScrollView
-            horizontal
-            pagingEnabled
-            showsHorizontalScrollIndicator={false}
-            ref={pagerRef}
-            onScroll={(e) => {
-              const x = e.nativeEvent.contentOffset.x;
-              const idx = Math.round(x / pageWidth);
-              if (idx !== tab) setTab(idx);
-            }}
-            scrollEventThrottle={16}
-          >
-            <View style={{ width: pageWidth, padding: 16 }}>
-              {loadingChart || !chart ? (
-                <ActivityIndicator />
-              ) : (
-                <BirthChartWheel chart={chart} />
-              )}
-            </View>
-            <View style={{ width: pageWidth, padding: 16 }}>
-              {loadingChart || !chart ? (
-                <ActivityIndicator />
-              ) : (
-                <BirthChartTable chart={chart} />
-              )}
-            </View>
-          </ScrollView>
         </View>
       </Modal>
     </View>
@@ -226,15 +366,15 @@ const styles = StyleSheet.create({
   row: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   rowLabel: { color: '#cfd8e3', fontSize: 14 },
   rowValue: { color: '#ffffff', fontSize: 14 },
+
+  devHint: { color: '#cfdaea', fontSize: 13, paddingTop: 4 },
 });
 
 const modalStyles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#0b0f14' },
   topBar: { paddingHorizontal: 16, paddingTop: 16, paddingBottom: 8, alignItems: 'flex-end' },
   closeText: { color: '#80d0ff', fontSize: 16, fontWeight: '600' },
-
-  tabs: { flexDirection: 'row', gap: 8, paddingHorizontal: 16, paddingTop: 8, paddingBottom: 8 },
-  tab: { backgroundColor: '#121821', borderRadius: 10, paddingVertical: 8, paddingHorizontal: 12 },
-  tabActive: { borderWidth: 1, borderColor: '#2d76ff' },
-  tabText: { color: 'white', fontSize: 14, fontWeight: '600' },
+  center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
+  errorText: { color: '#ffd1d1', fontSize: 16, fontWeight: '700', marginBottom: 4 },
+  errorSub: { color: '#cfdaea', fontSize: 13, textAlign: 'center', paddingHorizontal: 16 },
 });

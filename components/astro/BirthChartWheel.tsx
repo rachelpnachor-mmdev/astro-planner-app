@@ -2,7 +2,6 @@
 import React from 'react';
 import { StyleSheet, useWindowDimensions, View } from 'react-native';
 import Svg, { Circle, G, Line, Text as SvgText } from 'react-native-svg';
-import { ASPECT_COLORS, computeAspects, type Aspect } from '../../lib/astro/aspects';
 import type { BirthChart } from '../../lib/astro/types';
 
 const SIGN_GLYPHS = ['♈','♉','♊','♋','♌','♍','♎','♏','♐','♑','♒','♓'] as const;
@@ -12,7 +11,6 @@ const PLANET_GLYPH: Record<string, string> = {
 };
 const HOUSE_ROMAN = ['I','II','III','IV','V','VI','VII','VIII','IX','X','XI','XII'];
 
-type LineSeg = { x1: number; y1: number; x2: number; y2: number; color: string };
 
 export default function BirthChartWheel(
   { chart, availableWidth }: { chart: BirthChart; availableWidth?: number }
@@ -28,7 +26,6 @@ export default function BirthChartWheel(
   const rSign  = rOuter * 0.92;
   const rGlyph = rInner * 0.88;
   const rDeg   = rGlyph - 11;
-  const rAspect = (rGlyph + rInner * 0.45) / 2;   // tidy intersections
   const rHouseLabel = rInner * 0.935;             // inside ring for readability
   const cx = rOuter, cy = rOuter;
 
@@ -38,23 +35,17 @@ export default function BirthChartWheel(
   }
   const toLon = (signIndex: number, degree: number) => signIndex * 30 + degree;
 
+  // Normalize longitude to [0,360)
+  function norm360(x: number) { return ((x % 360) + 360) % 360; }
   // Planets
   const planets = chart.points.map(p => ({
     key: p.point,
     label: PLANET_GLYPH[p.point] ?? p.point.slice(0,2),
-    lon: toLon(p.ecliptic.signIndex, p.ecliptic.degree),
+    lon: norm360(toLon(p.ecliptic.signIndex, p.ecliptic.degree)),
     degText: `${p.ecliptic.degree.toFixed(1)}°`,
   }));
 
-  // Aspects
-  const aspects: Aspect[] = computeAspects(chart.points);
-  const lines: LineSeg[] = aspects.map((a) => {
-    const p1 = planets.find(p => p.key === a.p1)!;
-    const p2 = planets.find(p => p.key === a.p2)!;
-    const A = polar(p1.lon, rAspect);
-    const B = polar(p2.lon, rAspect);
-    return { x1: A.x, y1: A.y, x2: B.x, y2: B.y, color: ASPECT_COLORS[a.type] };
-  });
+  // Shared angle transform for glyphs and labels
 
   // Houses (fallback to whole-sign cusps if missing)
   const rawCusps = (chart.houses?.cusps && chart.houses.cusps.length === 12)
@@ -131,12 +122,7 @@ export default function BirthChartWheel(
           })}
         </G>
 
-        {/* aspect lines */}
-        <G>
-          {lines.map((l, i) => (
-            <Line key={i} x1={l.x1} y1={l.y1} x2={l.x2} y2={l.y2} stroke={l.color} strokeWidth={1.15} opacity={0.7}/>
-          ))}
-        </G>
+        {/* Aspect lines intentionally omitted for readability */}
 
         {/* planets */}
         <G>

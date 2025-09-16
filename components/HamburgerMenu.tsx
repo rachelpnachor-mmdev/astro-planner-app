@@ -1,7 +1,7 @@
+import { assignArchetypeProfile, loadArchetypeProfile } from "@/lib/profile/archetype";
 import { Feather } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import React from 'react';
-import { assignArchetypeProfile, loadArchetypeProfile } from "@/lib/profile/archetype";
 import { Modal, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { clearCurrentUser } from '../lib/authSession';
 

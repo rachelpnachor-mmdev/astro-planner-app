@@ -1,5 +1,5 @@
-import { Platform } from 'react-native';
 import * as SecureStore from 'expo-secure-store';
+import { Platform } from 'react-native';
 import type { Settings } from '../types/settings';
 
 const SETTINGS_KEY = 'lunaria/settings';

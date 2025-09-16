@@ -1,7 +1,7 @@
 import { assignArchetypeProfile, loadArchetypeProfile } from "@/lib/profile/archetype";
+import { useRouter } from 'expo-router';
 import React, { useEffect } from "react";
 import { Alert, Pressable, Text, View } from "react-native";
-import { useRouter } from 'expo-router';
 const SHOW_DEV_MENU =
   (typeof __DEV__ !== "undefined" && __DEV__) ||
   (typeof process !== "undefined" && process.env?.EXPO_PUBLIC_SHOW_DEV_MENU === "1");

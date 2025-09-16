@@ -157,7 +157,8 @@ Below is a day-by-day breakdown for each phase, scheduled Monday–Friday, with 
 **Week 3**
 - Mon: Build Profile (birth data) form (4h) - complete
     - Implement archetype assignment logic for AI assistant - complete
-- Tue: Add settings page (3h)
+- Tue: Add settings page (3h) - complete
+    - Profile and other patches - In progress
 - Wed: Build Horoscope section UI (4h)
     - Integrate AI-generated Daily Core capsule and tone adaptation
 - Thu: Build Focus section UI (3h)

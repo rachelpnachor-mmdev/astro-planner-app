@@ -1,166 +1,128 @@
-import { router } from 'expo-router';
-import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, Alert, Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+// app/profile/index.tsx
+import { useRouter } from 'expo-router';
+import React, { useEffect, useRef, useState } from 'react';
+import {
+  ActivityIndicator,
+  Modal,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  useWindowDimensions,
+  View,
+} from 'react-native';
 
-import ChartView from '../../components/astro/ChartView';
+import BirthChartTable from '../../components/astro/BirthChartTable';
+import BirthChartWheel from '../../components/astro/BirthChartWheel';
 import StarfieldBackground from '../../components/StarfieldBackground';
 import { useBirthChart } from '../../lib/astro/useBirthChart';
-import { getCurrentUser } from '../../lib/authSession';
-import { assignArchetypeProfile, loadArchetypeProfile } from '../../lib/profile/archetype';
 import { loadBirthProfile } from '../../lib/profile/birth';
-import type { BirthProfile } from '../../lib/types/profile';
-const SHOW_DEV_PANEL =
-  (typeof __DEV__ !== 'undefined' && __DEV__) ||
-  (typeof process !== 'undefined' && process.env?.EXPO_PUBLIC_SHOW_DEV_MENU === '1');
-  const SAMPLE_SIGNS = { rising: 'Aquarius', moon: 'Cancer', mars: 'Aquarius', venus: 'Scorpio' };
 
-  async function devAssignSampleArchetype() {
-    try {
-      const profile = await assignArchetypeProfile(SAMPLE_SIGNS);
-      const t = profile.tone_guidelines;
-      Alert.alert(
-        'Archetype saved',
-        `${profile.archetype}\nA:${t.assertiveness.toFixed(2)}  W:${t.warmth.toFixed(2)}  S:${t.structure.toFixed(2)}  P:${t.playfulness.toFixed(2)}`
-      );
-    } catch (err) {
-      Alert.alert('Error', 'Could not assign archetype profile.');
-      console.warn('[LUNARIA][triage] assign archetype failed', err);
-    }
-  }
+// Hide native header
+export const options = { headerShown: false, title: 'Profile' };
 
-  async function devShowArchetype() {
-    try {
-      const profile = await loadArchetypeProfile();
-      if (!profile) {
-        Alert.alert('Archetype', 'No archetype profile found.');
-        return;
-      }
-      const t = profile.tone_guidelines;
-      Alert.alert(
-        'Archetype',
-        `${profile.archetype}\nA:${t.assertiveness.toFixed(2)}  W:${t.warmth.toFixed(2)}  S:${t.structure.toFixed(2)}  P:${t.playfulness.toFixed(2)}`
-      );
-        console.warn('[LUNARIA][triage] archetype profile loaded', profile);
-    } catch (err) {
-      Alert.alert('Error', 'Could not load archetype profile.');
-        console.warn('[LUNARIA][triage] load archetype failed', err);
-    }
-  }
-
-const Colors = { 
-  bg: '#0B1220',
-  card: '#141C2F',
-  border: '#2A3447',
-  text: '#E6EDF3',
-  sub: '#8B96A8',
+type BirthProfile = {
+  name?: string;
+  birthDate?: string;     // 'YYYY-MM-DD'
+  birthTime?: string;     // 'HH:mm'
+  timezone?: string;      // IANA
+  birthplace?: string;    // free text
+  // tolerate alt keys too (so this file stays robust)
+  timeZone?: string;
+  tz?: string;
+  date?: string;
+  time?: string;
 };
-const S = StyleSheet.create({
-  root: { flex: 1, position: 'relative', backgroundColor: Colors.bg },
-  scroll: { backgroundColor: 'transparent' },
-  container: { padding: 16, gap: 16, backgroundColor: 'transparent' },
-  title: { fontSize: 22, fontWeight: '700', color: Colors.text },
-  toolbar: { flexDirection: 'row', justifyContent: 'flex-end', alignItems: 'center', marginTop: 4, marginBottom: 6 },
-  cancelLink: { color: Colors.text, fontWeight: '600', paddingHorizontal: 8, paddingVertical: 6 },
-  card: { backgroundColor: Colors.card, borderRadius: 12, padding: 16, borderWidth: 1, borderColor: Colors.border },
-  cardTopRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: 8,
-  },
-  cardLinkWrap: { paddingTop: 8 },
-  cardLink: { color: '#80d0ff', fontSize: 15, fontWeight: '500' },
-  labelText: { color: Colors.sub, marginBottom: 6, fontWeight: '600' },
-  value: { color: Colors.text },
-});
 
 export default function ProfileScreen() {
-  const [email, setEmail] = useState<string | null>(null);
-  const { chart, loading } = useBirthChart();
+  const router = useRouter();
+  const [profile, setProfile] = useState<BirthProfile | null>(null);
+  const [loadingProfile, setLoadingProfile] = useState(true);
+
+  // Birth chart modal state
   const [showChartModal, setShowChartModal] = useState(false);
-  const [birthProfile, setBirthProfile] = useState<BirthProfile | null>(null);
+  const pagerRef = useRef<ScrollView>(null);
+  const [tab, setTab] = useState(0);
+  const { width: pageWidth } = useWindowDimensions();
+
+  // Chart data (hook computes from saved profile + settings)
+  const { chart, loading: loadingChart } = useBirthChart();
 
   useEffect(() => {
     (async () => {
-      const bp = await loadBirthProfile();
-      setBirthProfile(bp);
+      try {
+        const p = await loadBirthProfile();
+        setProfile(p ?? {});
+      } finally {
+        setLoadingProfile(false);
+      }
     })();
   }, []);
 
-  useEffect(() => {
-    (async () => {
-      const u = await getCurrentUser();
-      setEmail(u?.email ?? null);
-    })();
-  }, []);
+  const onCancel = () => {
+    // history-aware cancel
+    // @ts-expect-error expo-router may expose canGoBack at runtime
+    if ((router as any)?.canGoBack?.()) router.back();
+    else router.replace('/');
+  };
+
+  // Safe accessors for display (tolerate slightly different keys)
+  const name = profile?.name || '';
+  const birthDate = profile?.birthDate || profile?.date || '';
+  const birthTime = profile?.birthTime || profile?.time || '';
+  const timezone = profile?.timezone || profile?.timeZone || profile?.tz || '';
+  const birthplace = profile?.birthplace || '';
 
   return (
-    <View style={S.root}>
+    <View style={styles.root}>
       <StarfieldBackground />
-      <ScrollView contentContainerStyle={S.container} style={S.scroll}>
-        <View style={S.toolbar}>
-          <Pressable
-            onPress={() => {
-              if (router.canGoBack()) router.back();
-              else router.replace("/");
-            }}
-            hitSlop={12}
-          >
-            <Text style={S.cancelLink}>Cancel</Text>
+
+      <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+        {/* Top bar */}
+        <View style={styles.topBar}>
+          <Text style={styles.h1}>Profile</Text>
+          <Pressable onPress={onCancel} accessibilityRole="button">
+            <Text style={styles.linkText}>Cancel</Text>
           </Pressable>
         </View>
-        <Text style={S.title}>Profile</Text>
 
-        {email && (
-          <View style={S.card}>
-            <Text style={{ color: Colors.sub, marginBottom: 6 }}>Account</Text>
-            <Text style={{ color: Colors.text, fontWeight: '600' }}>{email}</Text>
+        {/* Birth Profile card */}
+        <View style={styles.card}>
+          <View style={styles.cardTopRow}>
+            <Text style={styles.cardTitle}>Birth Profile</Text>
+            <Pressable
+              onPress={() => router.push('/profile/edit')}
+              accessibilityRole="button"
+            >
+              <Text style={styles.cardLink}>Edit</Text>
+            </Pressable>
           </View>
-        )}
 
+          {loadingProfile ? (
+            <ActivityIndicator />
+          ) : (
+            <>
+              {name ? <Row label="Name" value={name} /> : null}
+              {birthDate ? <Row label="Birth date" value={birthDate} /> : null}
+              {birthTime ? <Row label="Birth time" value={birthTime} /> : null}
+              {timezone ? <Row label="Timezone" value={timezone} /> : null}
+              {birthplace ? <Row label="Birthplace" value={birthplace} /> : null}
 
-        {/* Chart preview removed; open modal instead via the button below */}
-        <View style={S.card}>
-          <View style={S.cardTopRow}>
-          <Text style={S.title}>Birth Profile</Text>
-          <Pressable onPress={() => router.push('/profile/birth')} accessibilityRole="button">
-            <Text style={S.cardLink}>Edit</Text>
-          </Pressable>
+              <Pressable
+                onPress={() => setShowChartModal(true)}
+                accessibilityRole="button"
+                style={styles.cardLinkWrap}
+              >
+                <Text style={styles.cardLink}>View Birth Chart</Text>
+              </Pressable>
+            </>
+          )}
         </View>
-        {/* Render birth profile fields or empty state */}
-        <Text style={S.labelText}>
-          <Text style={S.value}>Name:</Text> <Text style={S.value}>{birthProfile?.fullName ?? '—'}</Text>
-        </Text>
-        <Text style={S.labelText}>
-          <Text style={S.value}>Birth date:</Text> <Text style={S.value}>{birthProfile?.dateISO ?? '—'}</Text>
-        </Text>
-        <Text style={S.labelText}>
-          <Text style={S.value}>Birth time:</Text> <Text style={S.value}>{birthProfile?.timeUnknown ? 'Unknown' : birthProfile?.time24 ?? '—'}</Text>
-        </Text>
-        <Text style={S.labelText}>
-          <Text style={S.value}>Timezone:</Text> <Text style={S.value}>{birthProfile?.timezone ?? '—'}</Text>
-        </Text>
-        <Text style={S.labelText}>
-          <Text style={S.value}>Birthplace:</Text> <Text style={S.value}>{birthProfile?.locationText ?? '—'}</Text>
-        </Text>
-        <Pressable onPress={() => setShowChartModal(true)} accessibilityRole="button" style={S.cardLinkWrap}>
-          <Text style={S.cardLink}>View Birth Chart</Text>
-        </Pressable>
-      </View>
 
-        {SHOW_DEV_PANEL && (
-          <View style={S.card}>
-            <Text style={{ color: Colors.sub, marginBottom: 6 }}>Dev • Archetype QA</Text>
-            <Pressable onPress={devAssignSampleArchetype} style={{ paddingVertical: 8 }}>
-              <Text style={{ color: Colors.text, fontWeight: '600' }}>Assign Sample (Aquarius ↑ / Cancer ☾)</Text>
-            </Pressable>
-            <Pressable onPress={devShowArchetype} style={{ paddingVertical: 8 }}>
-              <Text style={{ color: Colors.text, fontWeight: '600' }}>Show Current Archetype</Text>
-            </Pressable>
-          </View>
-        )}
+        {/* You can keep other cards (Account, Dev/QA) below as separate <View style={styles.card}> blocks */}
       </ScrollView>
-      {/* Modal for full-screen birth chart */}
+
+      {/* Birth Chart Modal */}
       <Modal
         visible={showChartModal}
         animationType="slide"
@@ -169,24 +131,110 @@ export default function ProfileScreen() {
       >
         <View style={modalStyles.container}>
           <StarfieldBackground />
+
           <View style={modalStyles.topBar}>
             <Pressable onPress={() => setShowChartModal(false)} accessibilityRole="button">
               <Text style={modalStyles.closeText}>Done</Text>
             </Pressable>
           </View>
-          <ScrollView contentContainerStyle={modalStyles.content}>
-            {loading || !chart ? <ActivityIndicator /> : <ChartView chart={chart} />}
+
+          {/* Tabs */}
+          <View style={modalStyles.tabs}>
+            <Pressable
+              onPress={() => {
+                setTab(0);
+                pagerRef.current?.scrollTo({ x: 0, animated: true });
+              }}
+              style={[modalStyles.tab, tab === 0 && modalStyles.tabActive]}
+            >
+              <Text style={modalStyles.tabText}>Chart</Text>
+            </Pressable>
+            <Pressable
+              onPress={() => {
+                setTab(1);
+                pagerRef.current?.scrollTo({ x: pageWidth, animated: true });
+              }}
+              style={[modalStyles.tab, tab === 1 && modalStyles.tabActive]}
+            >
+              <Text style={modalStyles.tabText}>Table</Text>
+            </Pressable>
+          </View>
+
+          {/* Horizontal pager */}
+          <ScrollView
+            horizontal
+            pagingEnabled
+            showsHorizontalScrollIndicator={false}
+            ref={pagerRef}
+            onScroll={(e) => {
+              const x = e.nativeEvent.contentOffset.x;
+              const idx = Math.round(x / pageWidth);
+              if (idx !== tab) setTab(idx);
+            }}
+            scrollEventThrottle={16}
+          >
+            <View style={{ width: pageWidth, padding: 16 }}>
+              {loadingChart || !chart ? (
+                <ActivityIndicator />
+              ) : (
+                <BirthChartWheel chart={chart} />
+              )}
+            </View>
+            <View style={{ width: pageWidth, padding: 16 }}>
+              {loadingChart || !chart ? (
+                <ActivityIndicator />
+              ) : (
+                <BirthChartTable chart={chart} />
+              )}
+            </View>
           </ScrollView>
         </View>
       </Modal>
     </View>
   );
 }
+
+function Row({ label, value }: { label: string; value: string }) {
+  return (
+    <View style={styles.row}>
+      <Text style={styles.rowLabel}>{label}:</Text>
+      <Text style={styles.rowValue}>{value}</Text>
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  root: { flex: 1, backgroundColor: '#0b0f14' },
+  container: { flex: 1 },
+  content: { padding: 16, gap: 16 },
+
+  topBar: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  h1: { color: 'white', fontSize: 28, fontWeight: '800' },
+  linkText: { color: '#80d0ff', fontSize: 16 },
+
+  card: { backgroundColor: '#121821', borderRadius: 12, padding: 16, gap: 10 },
+  cardTopRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 6,
+  },
+  cardTitle: { color: 'white', fontSize: 18, fontWeight: '700' },
+  cardLinkWrap: { paddingTop: 6 },
+  cardLink: { color: '#80d0ff', fontSize: 15, fontWeight: '500' },
+
+  row: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  rowLabel: { color: '#cfd8e3', fontSize: 14 },
+  rowValue: { color: '#ffffff', fontSize: 14 },
+});
+
 const modalStyles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#0b0f14' },
   topBar: { paddingHorizontal: 16, paddingTop: 16, paddingBottom: 8, alignItems: 'flex-end' },
   closeText: { color: '#80d0ff', fontSize: 16, fontWeight: '600' },
-  content: { padding: 16, gap: 12 },
-  viewLink: { paddingTop: 8 },
-  viewLinkText: { color: '#80d0ff', fontSize: 15 },
+
+  tabs: { flexDirection: 'row', gap: 8, paddingHorizontal: 16, paddingTop: 8, paddingBottom: 8 },
+  tab: { backgroundColor: '#121821', borderRadius: 10, paddingVertical: 8, paddingHorizontal: 12 },
+  tabActive: { borderWidth: 1, borderColor: '#2d76ff' },
+  tabText: { color: 'white', fontSize: 14, fontWeight: '600' },
 });

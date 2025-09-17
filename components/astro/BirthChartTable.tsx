@@ -1,13 +1,35 @@
 // components/astro/BirthChartTable.tsx
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
-import { computeAspects, type Aspect } from '../../lib/astro/aspects';
+import { computeAspects, type AspectEdge } from '../../lib/astro/aspects';
 import type { BirthChart } from '../../lib/astro/types';
 
 const SIGNS = ['Aries','Taurus','Gemini','Cancer','Leo','Virgo','Libra','Scorpio','Sagittarius','Capricorn','Aquarius','Pisces'];
 
 export default function BirthChartTable({ chart }: { chart: BirthChart }) {
-  const aspects: Aspect[] = computeAspects(chart.points);
+  // normalize a degree value into [0,360)
+  const norm360 = (x: number) => ((x % 360) + 360) % 360;
+  type Body = { id: string; lon: number };
+  function toBodies(points: any[]): Body[] {
+    return points
+      .map((p, idx) => {
+        const id: string =
+          (p.id ?? p.key ?? p.name ?? p.label ?? `P${idx}`) + '';
+        const lonRaw =
+          p.lon ?? p.longitude ?? p.lambda ?? p.elon ?? p.deg ?? p.degree;
+        const lon =
+          typeof lonRaw === 'number'
+            ? norm360(lonRaw)
+            : Number.isFinite(parseFloat(lonRaw))
+            ? norm360(parseFloat(lonRaw))
+            : undefined;
+        if (typeof lon !== 'number') return null;
+        return { id, lon };
+      })
+      .filter(Boolean) as Body[];
+  }
+  const bodies = toBodies(chart.points || []);
+  const aspects: AspectEdge[] = computeAspects(bodies);
   return (
     <View style={s.card}>
       <Text style={s.title}>Positions</Text>
@@ -23,10 +45,10 @@ export default function BirthChartTable({ chart }: { chart: BirthChart }) {
       <Text style={[s.title,{marginTop:12}]}>Aspects</Text>
       {aspects.length === 0 ? (
         <Text style={s.right}>None in orb</Text>
-      ) : aspects.map((a: Aspect, i: number) => (
-        <View key={i} style={s.row}>
-          <Text style={s.left}>{a.p1} – {a.p2}</Text>
-          <Text style={s.right}>{a.type} • Δ {a.delta}°</Text>
+      ) : aspects.map((edge, i) => (
+        <View key={`${edge.a}:${edge.b}:${edge.type}`} style={s.row}>
+          <Text style={s.left}>{edge.a} 1 {edge.b}</Text>
+          <Text style={s.right}>{edge.type} 2 94 {edge.delta.toFixed(1)}6</Text>
         </View>
       ))}
 

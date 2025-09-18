@@ -16,9 +16,12 @@ import {
 } from 'react-native';
 import SelectModal from '../../components/SelectModal';
 import StarfieldBackground from '../../components/StarfieldBackground';
+import { computeAndMaybePersist } from '../../lib/astro/computeOnce';
+import type { ChartSettings } from '../../lib/astro/types';
 import { getCurrentUser } from '../../lib/authSession';
 import { PLACES } from '../../lib/constants/places';
 import { TIMEZONES } from '../../lib/constants/timezones';
+import { getLocationCoords } from '../../lib/constants/locations';
 import {
   clearBirthProfile,
   defaultTimezone,
@@ -28,7 +31,7 @@ import {
   saveBirthProfile,
 } from '../../lib/profile/birth';
 import type { BirthProfile } from '../../lib/types/profile';
-import { findUserByEmail, setBirthProfileForUser } from '../../lib/userStore';
+import { findUserByEmail, setBirthProfileForUser, setProfileChart } from '../../lib/userStore';
 
 // ---- Lunaria dark theme palette (matches sign-in) ----
 const Colors = {
@@ -203,45 +206,75 @@ export default function BirthFormScreen() {
   }, [dirty, onCancel]);
 
   // save handler
-  async function onSave() {
+async function onSave() {
+  try {
+    // Normalize/derive fields
+    const birthDate = (dateISO || '').trim().slice(0, 10);
+    const birthTime = timeUnknown ? '' : (time24 || '').trim() || '12:00';
+    const timezoneStr = (timezone || '').trim() || defaultTimezone();
+    const place = locationText.trim();
+
+    const payload: Omit<BirthProfile, 'createdAt' | 'updatedAt'> & {
+      birthDate?: string;
+      birthTime?: string;
+      place?: string;
+    } = {
+      fullName: fullName.trim(),
+      dateISO: birthDate,
+      time24: timeUnknown ? null : birthTime,
+      timeUnknown,
+      timezone: timezoneStr,
+      locationText: place,
+      birthDate,
+      birthTime,
+      place,
+    };
+
+    await saveBirthProfile(payload);
+
+    const chartSettings: ChartSettings = {
+      methodology: 'western',
+      zodiac: 'tropical',
+      houseSystem: 'whole_sign',
+      ayanamsa: undefined,
+    };
+
     try {
-      // Also save alternate keys for chart compatibility
-      const birthDate = dateISO.trim().slice(0, 10);
-      const birthTime = timeUnknown ? '' : (time24.trim() || '00:00');
-      const place = locationText.trim();
-      const payload: Omit<BirthProfile, 'createdAt' | 'updatedAt'> & {
-        birthDate?: string;
-        birthTime?: string;
-        place?: string;
-      } = {
-        fullName: fullName.trim(),
-        dateISO: dateISO.trim(),
-        time24: timeUnknown ? null : time24.trim(),
-        timeUnknown,
-        timezone: timezone.trim() || defaultTimezone(),
-        locationText: locationText.trim(),
-        birthDate,
-        birthTime,
-        place,
-      };
+      // Look up coordinates for the selected location
+      const coords = getLocationCoords(place);
+      const lat = coords?.lat;
+      const lon = coords?.lon;
 
-      // Save to local profile file
-      await saveBirthProfile(payload);
-
-      // Also persist on the current user in userStore
-      const session = await getCurrentUser();
-      if (session?.email) {
-        const now = Date.now();
-        const forUser: BirthProfile = { ...payload, createdAt: now, updatedAt: now };
-        await setBirthProfileForUser(session.email, forUser);
+      if (__DEV__) {
+        console.log('[BirthForm] location lookup:', place, '→', coords);
       }
 
-      Alert.alert('Saved', 'Birth profile saved locally.');
-      setDirty(false);
-    } catch {
-      Alert.alert('Error', 'Could not save birth profile.');
+      const chart = await computeAndMaybePersist(
+        { birthDate, birthTime, timezone: timezoneStr, lat, lon },
+        chartSettings,
+        setProfileChart
+      );
+      if (__DEV__) {
+        const sun = chart?.points?.find((p: any) => p?.point === 'Sun');
+        console.log('[BirthForm] saved chart provider=', chart?.settings?.provider, 'Sun.lonDeg=', sun?.ecliptic?.lonDeg);
+      }
+    } catch (e) {
+      console.warn('[profileSave] chart compute/persist failed', e);
     }
+
+    const session = await getCurrentUser();
+    if (session?.email) {
+      const now = Date.now();
+      const forUser: BirthProfile = { ...payload, createdAt: now, updatedAt: now };
+      await setBirthProfileForUser(session.email, forUser);
+    }
+
+    Alert.alert('Saved', 'Birth profile and chart saved.');
+    setDirty(false);
+  } catch {
+    Alert.alert('Error', 'Could not save birth profile.');
   }
+}
 
   // clear handler (device-only)
   async function onClear() {

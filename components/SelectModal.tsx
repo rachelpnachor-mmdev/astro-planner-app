@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { FlatList, Modal, Platform, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { LunariaColors } from '../constants/Colors';
 
 export default function SelectModal({
   visible,
@@ -59,13 +60,13 @@ export default function SelectModal({
 }
 
 const S = StyleSheet.create({
-  wrap: { flex: 1, backgroundColor: '#0B1220', padding: 16, gap: 12 },
+  wrap: { flex: 1, backgroundColor: LunariaColors.bg, padding: 16, gap: 12 },
   title: { color: '#E6EDF3', fontSize: 18, fontWeight: '700' },
   search: {
-    backgroundColor: '#141C2F', color: '#E6EDF3', borderWidth: 1, borderColor: '#2A3447',
+    backgroundColor: LunariaColors.card, color: LunariaColors.text, borderWidth: 1, borderColor: LunariaColors.border,
     borderRadius: 12, paddingHorizontal: 12, paddingVertical: 10,
   },
-  row: { paddingVertical: 12, paddingHorizontal: 10, borderRadius: 10, backgroundColor: '#141C2F' },
+  row: { paddingVertical: 12, paddingHorizontal: 10, borderRadius: 10, backgroundColor: LunariaColors.card },
   rowText: { color: '#E6EDF3' },
   sep: { height: 8 },
   closeBtn: {

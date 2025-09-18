@@ -1,16 +1,29 @@
-import { Directory, File, Paths } from "expo-file-system";
 import { Platform } from "react-native";
 import { computeArchetypeProfile } from "../ai/archetype";
 import type { ArchetypeProfile } from "../types/archetype";
 
-
-const PROFILE_DIR = new Directory(Paths.document, "profile");
-const ARCHETYPE_FILE = new File(PROFILE_DIR, "archetype.json");
 const WEB_KEY = "lunaria/profile/archetype";
 
+// Platform-specific file system operations
+let Directory: any = null;
+let File: any = null;
+let Paths: any = null;
+
+if (Platform.OS !== "web") {
+  try {
+    const fileSystem = require("expo-file-system");
+    Directory = fileSystem.Directory;
+    File = fileSystem.File;
+    Paths = fileSystem.Paths;
+  } catch {
+    // expo-file-system not available
+  }
+}
 
 function ensureProfileDir(): void {
+  if (Platform.OS === "web" || !Directory || !Paths) return;
   try {
+    const PROFILE_DIR = new Directory(Paths.document, "profile");
     if (!PROFILE_DIR.exists) PROFILE_DIR.create();
   } catch {
     // silent
@@ -22,8 +35,11 @@ export async function saveArchetypeProfile(data: ArchetypeProfile): Promise<void
     try { window.localStorage.setItem(WEB_KEY, JSON.stringify(data)); } catch {}
     return;
   }
+  if (!Directory || !File || !Paths) return;
   ensureProfileDir();
   try {
+    const PROFILE_DIR = new Directory(Paths.document, "profile");
+    const ARCHETYPE_FILE = new File(PROFILE_DIR, "archetype.json");
     ARCHETYPE_FILE.write(JSON.stringify(data));
   } catch {
     // silent
@@ -37,7 +53,10 @@ export async function loadArchetypeProfile(): Promise<ArchetypeProfile | null> {
       return raw ? (JSON.parse(raw) as ArchetypeProfile) : null;
     } catch { return null; }
   }
+  if (!Directory || !File || !Paths) return null;
   try {
+    const PROFILE_DIR = new Directory(Paths.document, "profile");
+    const ARCHETYPE_FILE = new File(PROFILE_DIR, "archetype.json");
     if (!ARCHETYPE_FILE.exists) return null;
     const raw = ARCHETYPE_FILE.textSync();
     return raw ? (JSON.parse(raw) as ArchetypeProfile) : null;

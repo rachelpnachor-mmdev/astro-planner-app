@@ -1,100 +1,140 @@
 // lib/astro/useBirthChart.ts
-import { useFocusEffect } from 'expo-router';
-import { useCallback, useEffect, useState } from 'react';
-import { bus, EVENTS } from '../events/bus';
-import { loadSettings } from '../profile/settings';
-import { computeBirthChart } from './engine';
-import type { BirthChart } from './types';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
-// Assumes you already persist/load a birth profile somewhere:
+import { keyFromSettings } from '../../engine/provider';
+import { registry } from '../../engine/registry';
+import type { BirthChart, ChartSettings } from './types';
 
-import { loadBirthProfile } from '../profile/birth';
-
-// Tolerant view of what's persisted for a birth profile.
-type BirthProfileSaved = {
-  dateISO?: string;
-  birthDate?: string; date?: string;
-  birthTime?: string; time?: string;
-  timezone?: string; timeZone?: string; tz?: string;
-  lat?: number; latitude?: number;
-  lon?: number; longitude?: number;
+// If you already have BirthProfile elsewhere, import it and remove this.
+export type BirthProfile = {
+  birthDate?: string;       // 'YYYY-MM-DD'
+  birthTime?: string;       // 'HH:mm'
+  timezone?: string;        // IANA tz
+  lat?: number;
+  lon?: number;
 };
 
-const str = (v: unknown) => (typeof v === 'string' ? v : '');
-const num = (v: unknown) => (typeof v === 'number' ? v : undefined);
+export type UseBirthChartResult = {
+  chart: BirthChart | null;
+  loading: boolean;
+  error: Error | null;
+  refresh: () => Promise<void>;
+};
 
+export async function computeBirthChartViaProviders(
+  profile: BirthProfile,
+  settings: ChartSettings
+): Promise<BirthChart> {
+  const providerKey = keyFromSettings(settings);
+  const provider = registry[providerKey];
 
-export function useBirthChart() {
+  try {
+    const computed = await provider.compute(profile as any, settings);
+    return computed as BirthChart;
+  } catch (err) {
+    console.warn('[useBirthChart] provider failed; falling back to local western:', err);
+    const fallback = await registry.western.compute(
+      profile as any,
+      { ...settings, methodology: 'western' } as ChartSettings
+    );
+    return fallback as BirthChart;
+  }
+}
+
+export function useBirthChart(
+  profile: BirthProfile | null | undefined,
+  settings: ChartSettings | null | undefined
+): UseBirthChartResult {
   const [chart, setChart] = useState<BirthChart | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<Error | null>(null);
 
-  const recompute = useCallback(async () => {
-    setLoading(true);
-  const [rawProfile, settings] = await Promise.all([loadBirthProfile(), loadSettings()]); // rawProfile: any
-
-    // Tolerant mapping of saved fields
-    // Tolerant mapping of saved fields (typed, no `any`)
-    const p = (rawProfile ?? {}) as BirthProfileSaved;
-    const birthDate = str(p.birthDate ?? p.date);                  // 'YYYY-MM-DD'
-    const birthTimeRaw = str(p.birthTime ?? p.time);               // maybe ''
-    const birthTime = /^\d{2}:\d{2}$/.test(birthTimeRaw) ? birthTimeRaw : '00:00';
-    const zoneId = str(p.timezone ?? p.timeZone ?? p.tz);
-    const lat = num(p.lat ?? p.latitude);
-    const lon = num(p.lon ?? p.longitude);
-
-    // Prefer a prebuilt ISO if present, otherwise build a basic local ISO.
-    // (No external libs here; this at least uses your saved date & time.)
-  let dateISO: string | null = str(p.dateISO) || null;
-    if (!dateISO && /^\d{4}-\d{2}-\d{2}$/.test(birthDate)) {
-      // “Local” ISO string; device zone will be applied by JS Date.
-      // Good enough for now; we can switch to Luxon later for DST-aware offsets.
-      const time = /^\d{2}:\d{2}$/.test(birthTime) ? birthTime : '00:00';
-      dateISO = `${birthDate}T${time}:00`;
-    }
-
-    // Dev log so we can verify what we compute with
-     
-    console.log('[LUNARIA][astro] compute input (basic)', {
-      dateISO, zoneId, lat, lon,
-      system: settings?.astrology?.system,
-      houseSystem: settings?.astrology?.houseSystem,
+  const depsKey = useMemo(() => {
+    const p = profile ?? {};
+    const s = settings ?? {};
+    return JSON.stringify({
+      date: (p as any).birthDate,
+      time: (p as any).birthTime,
+      tz: (p as any).timezone,
+      // Exclude lat/lon from dependency since they get resolved during computation
+      // This prevents infinite loop when coordinates are resolved from locationText
+      locationText: (p as any).locationText,
+      methodology: (s as any).methodology,
+      zodiac: (s as any).zodiac,
+      houseSystem: (s as any).houseSystem,
+      ayanamsa: (s as any).ayanamsa,
     });
+  }, [profile, settings]);
 
-    if (!dateISO) {
-      setChart(null);
+  const mountedRef = useRef(true);
+  useEffect(() => {
+    mountedRef.current = true;
+    return () => { mountedRef.current = false; };
+  }, []);
+
+  const compute = useCallback(async () => {
+    if (!profile || !settings) {
       setLoading(false);
+      setChart(null);
+      setError(null);
       return;
     }
 
-    try {
-      // Default coords if missing so types stay numeric
-      const next = await computeBirthChart(
-        { dateISO, lat: lat ?? 0, lon: lon ?? 0, tzOffsetMinutes: 0 },
-        settings
-      );
-      setChart(next);
-    } catch (err) {
-       
-      console.log('[LUNARIA][astro] compute error', String(err));
+    // Additional validation - ensure we have essential birth data
+    const birthDate = (profile as any)?.birthDate;
+    if (!birthDate || birthDate.trim() === '' || birthDate === '—') {
+      setLoading(false);
       setChart(null);
+      setError(new Error('Birth date is required'));
+      return;
     }
-    setLoading(false);
-  }, []);
 
-  useEffect(() => { recompute(); }, [recompute]);
-  useFocusEffect(useCallback(() => { recompute(); }, [recompute]));
+    setLoading(true);
+    setError(null);
+    try {
+      const computed = await computeBirthChartViaProviders(profile, settings);
+
+      // DEV sanity log (type-safe)
+      if (__DEV__) {
+        const sun = computed?.points?.find((p: any) =>
+          p?.point === 'Sun' ||
+          p?.body === 'Sun' ||
+          p?.point?.name === 'Sun' ||
+          p?.body?.name === 'Sun'
+        );
+        const provider =
+          (computed as any)?.settings?.provider ??
+          (computed as any)?.settings?.methodology ??
+          'unknown';
+
+        const e: any = sun?.ecliptic ?? {};
+        const lonDeg =
+          typeof e.lonDeg === 'number' ? e.lonDeg :
+          typeof e?.longitude?.deg === 'number' ? e.longitude.deg :
+          typeof e?.lon?.deg === 'number' ? e.lon.deg :
+          (Number.isFinite(Number(e?.longitude)) ? Number(e.longitude) : undefined);
+
+         
+        console.log('[useBirthChart] provider=', provider, 'Sun.lonDeg=', lonDeg);
+      }
+
+      if (mountedRef.current) setChart(computed);
+    } catch (e: any) {
+      if (mountedRef.current) setError(e instanceof Error ? e : new Error(String(e)));
+    } finally {
+      if (mountedRef.current) setLoading(false);
+    }
+  }, [depsKey]);
 
   useEffect(() => {
-    const offSettings = bus.on(EVENTS.SETTINGS_CHANGED, () => {
-      console.log('[LUNARIA][astro] settings changed → recompute');
-      recompute();
-    });
-    const offBirth = bus.on(EVENTS.BIRTH_PROFILE_CHANGED, () => {
-      console.log('[LUNARIA][astro] birth profile changed → recompute');
-      recompute();
-    });
-    return () => { offSettings(); offBirth(); };
-  }, [recompute]);
+    void compute();
+  }, [compute]);
 
-  return { chart, loading, recompute };
+  const refresh = useCallback(async () => {
+    await compute();
+  }, [compute]);
+
+  return { chart, loading, error, refresh };
 }
+
+export default useBirthChart;

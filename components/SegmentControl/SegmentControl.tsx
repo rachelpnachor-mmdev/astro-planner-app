@@ -1,6 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { useState } from 'react';
 import { ActivityIndicator, I18nManager, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { LunariaColors } from '../../constants/Colors';
 
 export type SegmentOption = {
   key: string;
@@ -32,7 +33,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row', // will be overridden for RTL
     alignSelf: 'flex-start',
     borderRadius: 999,
-    backgroundColor: '#eee',
+    backgroundColor: LunariaColors.border,
     padding: 4,
   },
   button: {
@@ -48,10 +49,10 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: 16,
-    color: '#333',
+    color: LunariaColors.text,
   },
   disabledLabel: {
-    color: '#888',
+    color: LunariaColors.sub,
   },
   spinner: {
     alignItems: 'center' as const,

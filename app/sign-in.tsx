@@ -18,18 +18,19 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { setCurrentUser } from '../lib/authSession';
 import { addUser, findUserByEmail, getAllUsers, resetUsers } from '../lib/userStore';
+import { LunariaColors } from '../constants/Colors';
 
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#0B1220',
+    backgroundColor: LunariaColors.bg,
   },
   card: {
-    backgroundColor: '#141C2B',
+    backgroundColor: LunariaColors.card,
     borderRadius: 16,
     paddingHorizontal: 16,
     paddingVertical: 24,
-    borderColor: 'rgba(213,219,232,0.25)',
+    borderColor: LunariaColors.border,
     borderWidth: 1,
   },
   input: {
@@ -38,14 +39,14 @@ const styles = StyleSheet.create({
     backgroundColor: 'transparent',
     borderRadius: 16,
     paddingHorizontal: 16,
-    color: '#FFFFFF',
+    color: LunariaColors.white,
     borderWidth: 1,
-    borderColor: 'rgba(213,219,232,0.25)',
+    borderColor: LunariaColors.border,
     fontSize: 16,
   },
   inputFocused: {
-    borderColor: '#3B82F6',
-    shadowColor: '#3B82F6',
+    borderColor: LunariaColors.focus,
+    shadowColor: LunariaColors.focus,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
     shadowRadius: 4,
@@ -54,12 +55,12 @@ const styles = StyleSheet.create({
     height: 52,
     width: '100%',
     borderRadius: 999,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: LunariaColors.white,
     alignItems: 'center',
     justifyContent: 'center',
   },
   primaryButtonText: {
-    color: '#0B1220',
+    color: LunariaColors.blackOnWhite,
     fontWeight: '600',
     fontSize: 16,
   },
@@ -69,7 +70,7 @@ const styles = StyleSheet.create({
     borderRadius: 999,
     backgroundColor: 'transparent',
     borderWidth: 1,
-    borderColor: '#D5DBE8',
+    borderColor: LunariaColors.sub,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
@@ -78,7 +79,7 @@ const styles = StyleSheet.create({
   socialIcon: {
     fontSize: 20,
     marginRight: 12,
-    color: '#D5DBE8',
+    color: LunariaColors.sub,
   },
   googleIcon: {
     width: 20,
@@ -87,22 +88,22 @@ const styles = StyleSheet.create({
     resizeMode: 'contain',
   },
   socialButtonText: {
-    color: '#D5DBE8',
+    color: LunariaColors.sub,
     fontWeight: '600',
     fontSize: 16,
   },
   errorText: {
-    color: '#EF4444',
+    color: LunariaColors.danger,
     marginTop: 6,
   },
   linkForgot: {
-    color: '#D5DBE8',
+    color: LunariaColors.sub,
     fontSize: 15,
     textAlign: 'center',
     textDecorationLine: 'underline',
   },
   linkSignup: {
-    color: '#3B82F6',
+    color: LunariaColors.focus,
     fontSize: 15,
     textAlign: 'center',
     textDecorationLine: 'underline',
@@ -223,7 +224,7 @@ export default function SignInScreen() {
   return (
     <SafeAreaView style={styles.safeArea}>
       <Stack.Screen options={{ headerShown: false }} />
-      <View pointerEvents="none" style={[StyleSheet.absoluteFill, { backgroundColor: '#0B1220' }]}> 
+      <View pointerEvents="none" style={[StyleSheet.absoluteFill, { backgroundColor: LunariaColors.bg }]}> 
         {stars.map((s, i) => {
           const style = {
             position: 'absolute' as const,
@@ -264,7 +265,7 @@ export default function SignInScreen() {
             <TextInput
               style={[styles.input, emailFocused && styles.inputFocused]}
               placeholder="Email"
-              placeholderTextColor="#D5DBE8"
+              placeholderTextColor={LunariaColors.sub}
               value={email}
               onChangeText={(t) => {
                 setEmail(t);
@@ -288,7 +289,7 @@ export default function SignInScreen() {
               ref={passwordRef}
               style={[styles.input, passwordFocused && styles.inputFocused]}
               placeholder="Password"
-              placeholderTextColor="#D5DBE8"
+              placeholderTextColor={LunariaColors.sub}
               value={password}
               onChangeText={(t) => {
                 setPassword(t);

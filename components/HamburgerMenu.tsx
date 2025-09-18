@@ -4,6 +4,7 @@ import { useRouter } from 'expo-router';
 import React from 'react';
 import { Modal, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { clearCurrentUser } from '../lib/authSession';
+import { LunariaColors } from '../constants/Colors';
 
 export default function HamburgerMenu({ visible, onClose }: { visible: boolean; onClose: () => void }) {
   const router = useRouter();
@@ -70,7 +71,7 @@ export default function HamburgerMenu({ visible, onClose }: { visible: boolean; 
               router.replace('/sign-in');
             }}
           >
-            <Text style={[styles.itemText, { color: '#EF4444', fontWeight: '600' }]}>Sign out</Text>
+            <Text style={[styles.itemText, { color: LunariaColors.danger, fontWeight: '600' }]}>Sign out</Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.closeBtn}
@@ -78,7 +79,7 @@ export default function HamburgerMenu({ visible, onClose }: { visible: boolean; 
             accessibilityLabel="Close menu"
             accessibilityRole="button"
           >
-            <Feather name="x" size={24} color="#222" accessibilityLabel="Close icon" accessibilityRole="image" />
+            <Feather name="x" size={24} color={LunariaColors.text} accessibilityLabel="Close icon" accessibilityRole="image" />
           </TouchableOpacity>
         </View>
       </View>
@@ -89,28 +90,31 @@ export default function HamburgerMenu({ visible, onClose }: { visible: boolean; 
 const styles = StyleSheet.create({
   overlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.2)',
+    backgroundColor: 'rgba(0,0,0,0.5)',
     justifyContent: 'flex-start',
   },
   menu: {
-    backgroundColor: '#fff',
+    backgroundColor: LunariaColors.card,
     borderBottomLeftRadius: 16,
     borderBottomRightRadius: 16,
     padding: 24,
     paddingTop: 40,
     minHeight: 220,
+    borderBottomWidth: 1,
+    borderBottomColor: LunariaColors.border,
   },
   title: {
     fontSize: 20,
     fontWeight: 'bold',
     marginBottom: 16,
+    color: LunariaColors.text,
   },
   item: {
     paddingVertical: 12,
   },
   itemText: {
     fontSize: 16,
-    color: '#222',
+    color: LunariaColors.text,
   },
   closeBtn: {
     position: 'absolute',

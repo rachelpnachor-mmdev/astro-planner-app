@@ -8,6 +8,7 @@ import TodayToggle from '../components/sections/Horoscope/TodayToggle';
 import TransitSummary from '../components/sections/Horoscope/TransitSummary';
 import UpcomingEvents from '../components/sections/Horoscope/UpcomingEvents';
 import { useEntitlement } from '../context/EntitlementContext';
+import { LunariaColors } from '../constants/Colors';
 
 const { width } = Dimensions.get('window');
 
@@ -34,11 +35,11 @@ const styles = StyleSheet.create({
   },
   labelPreviewText: {
     fontSize: 13,
-    color: '#444',
+    color: LunariaColors.sub,
     fontStyle: 'italic',
     maxWidth: width * 0.45,
   },
-  root: { flex: 1, backgroundColor: '#fff' },
+  root: { flex: 1, backgroundColor: LunariaColors.bg },
   container: { alignItems: 'flex-start' },
   header: { fontSize: 28, fontWeight: 'bold', marginBottom: 16, marginTop: 24, marginLeft: 24 },
   indicatorRow: {
@@ -51,11 +52,11 @@ const styles = StyleSheet.create({
     width: 8,
     height: 8,
     borderRadius: 4,
-    backgroundColor: '#ccc',
+    backgroundColor: LunariaColors.border,
     marginHorizontal: 4,
   },
   dotActive: {
-    backgroundColor: '#222',
+    backgroundColor: LunariaColors.focus,
   },
   section: { justifyContent: 'center', alignItems: 'flex-start' },
   sectionTitle: { fontSize: 16, fontWeight: '600' },

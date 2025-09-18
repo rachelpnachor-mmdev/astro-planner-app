@@ -4,10 +4,11 @@ import * as SplashScreen from 'expo-splash-screen';
 import React, { useEffect, useState } from 'react';
 import { DevSettings, StyleSheet, View } from 'react-native';
 import { EntitlementProvider } from '../context/EntitlementContext';
+import { LunariaColors } from '../constants/Colors';
 
 import Starfield from '../components/Starfield';
 const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: '#0B0E1A' },
+  root: { flex: 1, backgroundColor: LunariaColors.bg },
   content: { flex: 1 },
 });
 

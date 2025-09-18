@@ -13,7 +13,9 @@ import {
 } from 'react-native';
 
 import StarfieldBackground from '../../components/StarfieldBackground';
+import { LunariaColors } from '../../constants/Colors';
 import { useBirthChart } from '../../lib/astro/useBirthChart';
+import type { ChartSettings } from '../../lib/astro/types';
 import { getCurrentUser } from '../../lib/authSession';
 import { assignArchetypeProfile, loadArchetypeProfile } from '../../lib/profile/archetype';
 import { loadBirthProfile } from '../../lib/profile/birth';
@@ -114,8 +116,16 @@ export default function ProfileScreen() {
     (typeof __DEV__ !== 'undefined' && __DEV__) ||
     (typeof process !== 'undefined' && process.env?.EXPO_PUBLIC_SHOW_DEV_MENU === '1');
 
+  // Default chart settings
+  const chartSettings: ChartSettings = {
+    methodology: 'western',
+    zodiac: 'tropical',
+    houseSystem: 'whole_sign',
+    ayanamsa: null,
+  };
+
   // Compute chart (hook is already guarded)
-  const { chart, loading: loadingChart } = useBirthChart();
+  const { chart, loading: loadingChart, error: chartError } = useBirthChart(profile, chartSettings);
 
   // Load birth profile from user store (if logged in) or secure store; then normalize
   useEffect(() => {
@@ -134,6 +144,18 @@ export default function ProfileScreen() {
       const normalized = normalizeBirthProfile(birthProfile);
        
       console.log('[LUNARIA][profile] normalized birth profile', normalized);
+
+      // Temporary: Check user data source for verification
+      if (session?.email === 'rachelpnachor@gmail.com') {
+        console.log('[VERIFICATION] Profile source for Rachel:');
+        console.log('- From server DB:', !!birthProfile && birthProfile !== await loadBirthProfile());
+        console.log('- Birth data:', {
+          date: normalized?.birthDate || normalized?.date,
+          time: normalized?.birthTime || normalized?.time,
+          place: normalized?.birthplace || normalized?.place
+        });
+      }
+
       setProfile(normalized);
       setLoadingProfile(false);
     })();
@@ -278,7 +300,7 @@ export default function ProfileScreen() {
                 }
               }}
             >
-              <Text style={{ color: '#80d0ff', fontSize: 15 }}>Assign Archetype Profile (Sample)</Text>
+              <Text style={{ color: LunariaColors.focus, fontSize: 15 }}>Assign Archetype Profile (Sample)</Text>
             </Pressable>
             <Pressable
               style={{ paddingVertical: 8 }}
@@ -304,7 +326,7 @@ export default function ProfileScreen() {
                 }
               }}
             >
-              <Text style={{ color: '#80d0ff', fontSize: 15 }}>Load Archetype Profile</Text>
+              <Text style={{ color: LunariaColors.focus, fontSize: 15 }}>Load Archetype Profile</Text>
             </Pressable>
           </View>
         )}
@@ -358,15 +380,15 @@ function Row({ label, value }: { label: string; value: string }) {
 }
 
 const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: '#0b0f14' },
+  root: { flex: 1, backgroundColor: LunariaColors.bg },
   container: { flex: 1 },
   content: { padding: 16, gap: 16 },
 
   topBar: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   h1: { color: 'white', fontSize: 28, fontWeight: '800' },
-  linkText: { color: '#80d0ff', fontSize: 16 },
+  linkText: { color: LunariaColors.focus, fontSize: 16 },
 
-  card: { backgroundColor: '#121821', borderRadius: 12, padding: 16, gap: 10 },
+  card: { backgroundColor: LunariaColors.card, borderRadius: 12, padding: 16, gap: 10 },
   cardTopRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -375,20 +397,20 @@ const styles = StyleSheet.create({
   },
   cardTitle: { color: 'white', fontSize: 18, fontWeight: '700' },
   cardLinkWrap: { paddingTop: 6 },
-  cardLink: { color: '#80d0ff', fontSize: 15, fontWeight: '500' },
+  cardLink: { color: LunariaColors.focus, fontSize: 15, fontWeight: '500' },
 
   row: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  rowLabel: { color: '#cfd8e3', fontSize: 14 },
-  rowValue: { color: '#ffffff', fontSize: 14 },
+  rowLabel: { color: LunariaColors.sub, fontSize: 14 },
+  rowValue: { color: LunariaColors.white, fontSize: 14 },
 
-  devHint: { color: '#cfdaea', fontSize: 13, paddingTop: 4 },
+  devHint: { color: LunariaColors.text, fontSize: 13, paddingTop: 4 },
 });
 
 const modalStyles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#0b0f14' },
+  container: { flex: 1, backgroundColor: LunariaColors.bg },
   topBar: { paddingHorizontal: 16, paddingTop: 16, paddingBottom: 8, alignItems: 'flex-end' },
-  closeText: { color: '#80d0ff', fontSize: 16, fontWeight: '600' },
+  closeText: { color: LunariaColors.focus, fontSize: 16, fontWeight: '600' },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  errorText: { color: '#ffd1d1', fontSize: 16, fontWeight: '700', marginBottom: 4 },
-  errorSub: { color: '#cfdaea', fontSize: 13, textAlign: 'center', paddingHorizontal: 16 },
+  errorText: { color: LunariaColors.danger, fontSize: 16, fontWeight: '700', marginBottom: 4 },
+  errorSub: { color: LunariaColors.text, fontSize: 13, textAlign: 'center', paddingHorizontal: 16 },
 });

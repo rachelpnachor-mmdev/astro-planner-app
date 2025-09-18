@@ -1,0 +1,20 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm install:*)",
+      "Bash(npx expo start:*)",
+      "Bash(npx tsc:*)",
+      "Read(//c/users/Rachel/desktop/**)",
+      "Bash(cat:*)",
+      "mcp__ide__getDiagnostics",
+      "Bash(npm outdated)",
+      "Bash(npm ls:*)",
+      "Bash(sort:*)",
+      "Bash(npm audit:*)",
+      "Bash(find:*)",
+      "Bash(npm test:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

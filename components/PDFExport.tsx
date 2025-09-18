@@ -5,6 +5,7 @@ import * as WebBrowser from 'expo-web-browser';
 import React from 'react';
 import { Alert, Button, StyleSheet, Text, View } from 'react-native';
 import { WebView } from 'react-native-webview';
+import { LunariaColors } from '../constants/Colors';
 
 export default function PDFExport() {
   // Remote PDF URL for preview and sharing
@@ -46,7 +47,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     padding: 24,
-    backgroundColor: '#fff',
+    backgroundColor: LunariaColors.bg,
   },
   title: {
     fontSize: 24,
@@ -56,7 +57,7 @@ const styles = StyleSheet.create({
   subtitle: {
     fontSize: 16,
     marginBottom: 24,
-    color: '#555',
+    color: LunariaColors.text,
   },
   pdfContainer: {
     flex: 1,
@@ -72,7 +73,7 @@ const styles = StyleSheet.create({
   },
   note: {
     fontSize: 14,
-    color: '#888',
+    color: LunariaColors.sub,
     marginTop: 24,
     textAlign: 'center',
   },

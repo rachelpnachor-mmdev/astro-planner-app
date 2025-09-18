@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, TouchableOpacity, Text, StyleSheet, Animated } from 'react-native';
 import { BottomTabBarProps } from '@react-navigation/bottom-tabs';
+import { LunariaColors } from '../constants/Colors';
 
 const TAB_CONFIG = [
   {
@@ -51,7 +52,7 @@ export default function CustomTabBar({ state, descriptors, navigation }: BottomT
           >
             <View style={styles.iconLabelRow}>
               <Text
-                style={[styles.emoji, { color: focused ? '#222' : '#888' }]} 
+                style={[styles.emoji, { color: focused ? LunariaColors.text : LunariaColors.sub }]} 
                 accessibilityRole="image"
                 accessibilityLabel={`${tab?.emoji} icon for ${tab?.label}`}
               >
@@ -80,9 +81,9 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
     height: 60,
-    backgroundColor: '#fff',
+    backgroundColor: LunariaColors.card,
     borderTopWidth: 0.5,
-    borderColor: '#ccc',
+    borderColor: LunariaColors.border,
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: 4,
@@ -126,7 +127,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: 'bold',
     marginLeft: 8,
-    color: '#222',
+    color: LunariaColors.text,
     maxWidth: 100,
     lineHeight: 18,
     textAlign: 'left',

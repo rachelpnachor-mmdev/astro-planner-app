@@ -9,6 +9,7 @@ import StarfieldBackground from '../../components/StarfieldBackground';
 import { ASTROLOGY_SYSTEMS, HOUSE_SYSTEMS } from '../../lib/constants/astrology';
 import { defaultSettings, loadSettings, saveSettings, updateSettings } from '../../lib/profile/settings';
 import type { AstrologySystem, HouseSystem, Settings } from '../../lib/types/settings';
+import { LunariaColors } from '../../constants/Colors';
 
 // Hide native header
 export const options = { headerShown: false, title: 'Settings' };
@@ -214,15 +215,15 @@ function Row({
 }
 
 const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: '#0b0f14' }, // starfield sits behind this
+  root: { flex: 1, backgroundColor: LunariaColors.bg }, // starfield sits behind this
   container: { flex: 1 },
   content: { padding: 16, gap: 16 },
   center: { alignItems: 'center', justifyContent: 'center' },
 
   topBar: { flexDirection: 'row', justifyContent: 'flex-end', marginBottom: 8 },
-  linkText: { color: '#80d0ff', fontSize: 16 },
+  linkText: { color: LunariaColors.focus, fontSize: 16 },
 
-  card: { backgroundColor: '#121821', borderRadius: 12, padding: 16, gap: 12 },
+  card: { backgroundColor: LunariaColors.card, borderRadius: 12, padding: 16, gap: 12 },
   cardTitle: { color: 'white', fontSize: 16, fontWeight: '600' },
 
   row: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
@@ -234,12 +235,12 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingVertical: 8,
   },
-  valueText: { color: '#b9c7d9', fontSize: 14 },
+  valueText: { color: LunariaColors.sub, fontSize: 14 },
 
-  divider: { height: 1, backgroundColor: '#1c2531', marginVertical: 4 },
+  divider: { height: 1, backgroundColor: LunariaColors.border, marginVertical: 4 },
 
   saveBtn: {
-    backgroundColor: '#2d76ff',
+    backgroundColor: LunariaColors.focus,
     borderRadius: 12,
     paddingVertical: 12,
     alignItems: 'center',

@@ -9,6 +9,7 @@ import HoroscopeScreen from '../screens/HoroscopeScreen';
 import KitchenHomeScreen from '../screens/KitchenHomeScreen';
 import ReflectionsScreen from '../screens/ReflectionsScreen';
 import RitualsScreen from '../screens/RitualsScreen';
+import { HoroscopeColors } from '../constants/Colors';
 
 const Tab = createBottomTabNavigator();
 
@@ -16,35 +17,35 @@ const TAB_CONFIG = [
   {
     name: 'Horoscope',
     component: HoroscopeScreen,
-  icon: (focused: boolean) => <MaterialCommunityIcons name="moon-waning-crescent" size={24} color={focused ? '#222' : '#888'} />,
+    icon: (focused: boolean) => <MaterialCommunityIcons name="moon-waning-crescent" size={24} color={focused ? HoroscopeColors.accent : HoroscopeColors.text3} />,
     label: 'Horoscope',
     emoji: '🌙',
   },
   {
     name: 'Rituals',
     component: RitualsScreen,
-  icon: (focused: boolean) => <MaterialCommunityIcons name="crystal-ball" size={24} color={focused ? '#222' : '#888'} />,
+    icon: (focused: boolean) => <MaterialCommunityIcons name="crystal-ball" size={24} color={focused ? HoroscopeColors.accent : HoroscopeColors.text3} />,
     label: 'Rituals',
     emoji: '🔮',
   },
   {
-    name: 'KitchenHome',
+    name: 'Apothecary',
     component: KitchenHomeScreen,
-  icon: (focused: boolean) => <FontAwesome5 name="utensils" size={22} color={focused ? '#222' : '#888'} />,
+    icon: (focused: boolean) => <MaterialCommunityIcons name="mortar-pestle" size={22} color={focused ? HoroscopeColors.accent : HoroscopeColors.text3} />,
     label: 'Kitchen & Home',
-    emoji: '🍲',
+    emoji: '🔮',
   },
   {
     name: 'Goals',
     component: GoalsScreen,
-  icon: (focused: boolean) => <Feather name="target" size={22} color={focused ? '#222' : '#888'} />,
+    icon: (focused: boolean) => <MaterialCommunityIcons name="star-shooting" size={22} color={focused ? HoroscopeColors.accent : HoroscopeColors.text3} />,
     label: 'Goals',
-    emoji: '🎯',
+    emoji: '⭐',
   },
   {
-    name: 'Reflections',
+    name: 'BOS',
     component: ReflectionsScreen,
-  icon: (focused: boolean) => <Ionicons name="book-outline" size={22} color={focused ? '#222' : '#888'} />,
+    icon: (focused: boolean) => <Ionicons name="book-outline" size={22} color={focused ? HoroscopeColors.accent : HoroscopeColors.text3} />,
     label: 'Reflections',
     emoji: '📖',
   },
@@ -67,7 +68,7 @@ export default function BottomTabs() {
               accessibilityLabel="Open menu"
               accessibilityRole="button"
             >
-              <Feather name="menu" size={26} color="#222" />
+              <Feather name="menu" size={26} color={HoroscopeColors.text} />
             </TouchableOpacity>
           ),
         }}

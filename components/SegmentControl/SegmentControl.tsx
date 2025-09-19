@@ -1,7 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { useState } from 'react';
 import { ActivityIndicator, I18nManager, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { LunariaColors } from '../../constants/Colors';
+import { HoroscopeColors } from '../../constants/Colors';
 
 export type SegmentOption = {
   key: string;
@@ -33,7 +33,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row', // will be overridden for RTL
     alignSelf: 'flex-start',
     borderRadius: 999,
-    backgroundColor: LunariaColors.border,
+    backgroundColor: HoroscopeColors.border,
     padding: 4,
   },
   button: {
@@ -49,10 +49,10 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: 16,
-    color: LunariaColors.text,
+    color: HoroscopeColors.text,
   },
   disabledLabel: {
-    color: LunariaColors.sub,
+    color: HoroscopeColors.sub,
   },
   spinner: {
     alignItems: 'center' as const,
@@ -130,12 +130,12 @@ export const SegmentControl: React.FC<SegmentControlProps> = ({
   };
   const t = sizeTokens[size] || sizeTokens.md;
 
-  // Theme tokens
-  const bg = theme.background || '#eee';
-  const selBg = theme.selectedBackground || '#ccc';
+  // Theme tokens - use HoroscopeColors for gold accent theming
+  const bg = theme.background || HoroscopeColors.surface;
+  const selBg = theme.selectedBackground || HoroscopeColors.accent;
   const border = theme.border || 'transparent';
-  const text = theme.text || '#333';
-  const selText = theme.selectedText || '#111';
+  const text = theme.text || HoroscopeColors.text;
+  const selText = theme.selectedText || HoroscopeColors.text;
 
   return (
     <View

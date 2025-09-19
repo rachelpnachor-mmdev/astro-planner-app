@@ -1,7 +1,7 @@
 
 import { useNavigation } from '@react-navigation/native';
 import React, { useRef, useState, useEffect } from 'react';
-import { Dimensions, ScrollView, StyleSheet, Text, View, StatusBar, Pressable, Image, TouchableOpacity } from 'react-native';
+import { Dimensions, ScrollView, StyleSheet, Text, View, StatusBar, Pressable, Image, ImageBackground, TouchableOpacity } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import TodayToggle from '../components/sections/Horoscope/TodayToggle';
 import TransitSummary from '../components/sections/Horoscope/TransitSummary';
@@ -13,7 +13,7 @@ import HamburgerMenu from '../components/HamburgerMenu';
 
 const { width } = Dimensions.get('window');
 
-// Pre-load the header logo (now optimized)
+// Pre-load the header logo (transparent version)
 const headerLogo = require('../assets/images/LunariaLogoHeader.png');
 
 const styles = StyleSheet.create({
@@ -68,21 +68,39 @@ const styles = StyleSheet.create({
     shadowRadius: 3,
     elevation: 3,
   },
-  logoContainerInline: {
+  logoFixed: {
     position: 'absolute',
-    top: -45,
-    left: -20,
-    backgroundColor: 'rgba(11, 15, 20, 0.7)',
-    borderRadius: 16,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    alignSelf: 'flex-start',
-    width: 'auto',
-    zIndex: -1, // Behind all content
+    top: 25,
+    left: -90,
+    height: 80, // Another 10% larger (73 * 1.10)
+    width: 374, // Another 10% larger (340 * 1.10)
+    zIndex: 100,
   },
-  pageLogo: {
-    height: 240, // 100% bigger (120 * 2)
-    width: 240, // 100% bigger (120 * 2)
+  previewContainer: {
+    position: 'absolute',
+    top: 100,
+    zIndex: 50,
+    backgroundColor: 'rgba(11, 15, 20, 0.8)',
+    borderRadius: 20,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  previewLeft: {
+    left: 10,
+  },
+  previewRight: {
+    right: 10,
+  },
+  previewText: {
+    color: HoroscopeColors.text,
+    fontSize: 12,
+    fontWeight: '500',
+    marginHorizontal: 6,
+  },
+  previewArrow: {
+    color: HoroscopeColors.accent,
   },
 });
 
@@ -109,11 +127,18 @@ export default function HoroscopeScreen() {
   const scrollRef = useRef(null);
   const { entitlement } = useEntitlement();
 
-  // Force image preload
+  // Preload logo for instant display
   useEffect(() => {
-    Image.prefetch(Image.resolveAssetSource(headerLogo).uri)
-      .then(() => setLogoLoaded(true))
-      .catch(() => setLogoLoaded(true)); // Show even if prefetch fails
+    const preloadLogo = async () => {
+      try {
+        await Image.prefetch(Image.resolveAssetSource(headerLogo).uri);
+        setLogoLoaded(true);
+      } catch (error) {
+        console.warn('Logo preload failed:', error);
+        setLogoLoaded(true); // Still show the logo even if preload fails
+      }
+    };
+    preloadLogo();
   }, []);
 
   // Determine locked state for each section
@@ -202,20 +227,50 @@ export default function HoroscopeScreen() {
       >
         {SECTION_COMPONENTS.map((SectionComponent, idx) => (
           <View key={idx} style={styles.panel}>
-            {/* Logo positioned within first panel only */}
-            {idx === 0 && (
-              <View style={styles.logoContainerInline}>
-                <Image
-                  source={headerLogo}
-                  style={styles.pageLogo}
-                  resizeMode="contain"
-                />
-              </View>
-            )}
             <SectionComponent locked={lockedStates[idx]} />
           </View>
         ))}
       </ScrollView>
+
+      {/* Fixed Logo */}
+      {logoLoaded && (
+        <ImageBackground
+          source={headerLogo}
+          style={styles.logoFixed}
+          resizeMode="contain"
+          imageStyle={{
+            alignSelf: 'flex-start',
+            marginLeft: 0,
+            left: 0
+          }}
+          cache="force-cache"
+        />
+      )}
+
+      {/* Navigation Preview Indicators */}
+      {page > 0 && (
+        <TouchableOpacity
+          style={[styles.previewContainer, styles.previewLeft]}
+          onPress={() => navigateToPanel(page - 1)}
+          accessibilityLabel={`Previous: ${SECTION_LABELS[page - 1]}`}
+          accessibilityRole="button"
+        >
+          <Feather name="chevron-left" size={16} style={styles.previewArrow} />
+          <Text style={styles.previewText}>{SECTION_LABELS[page - 1]}</Text>
+        </TouchableOpacity>
+      )}
+
+      {page < SECTION_COMPONENTS.length - 1 && (
+        <TouchableOpacity
+          style={[styles.previewContainer, styles.previewRight]}
+          onPress={() => navigateToPanel(page + 1)}
+          accessibilityLabel={`Next: ${SECTION_LABELS[page + 1]}`}
+          accessibilityRole="button"
+        >
+          <Text style={styles.previewText}>{SECTION_LABELS[page + 1]}</Text>
+          <Feather name="chevron-right" size={16} style={styles.previewArrow} />
+        </TouchableOpacity>
+      )}
 
       {/* Panel Indicator Dots */}
       <View style={styles.indicatorContainer}>

@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, TouchableOpacity, Text, StyleSheet, Animated } from 'react-native';
 import { BottomTabBarProps } from '@react-navigation/bottom-tabs';
-import { LunariaColors } from '../constants/Colors';
+import { HoroscopeColors } from '../constants/Colors';
 
 const TAB_CONFIG = [
   {
@@ -15,17 +15,17 @@ const TAB_CONFIG = [
     label: 'Rituals',
   },
   {
-    name: 'KitchenHome',
-    emoji: '🍲',
-    label: 'Kitchen &\nHome',
+    name: 'Apothecary',
+    emoji: '🥄',
+    label: 'Kitchen & Home',
   },
   {
     name: 'Goals',
-    emoji: '🎯',
+    emoji: '⭐',
     label: 'Goals',
   },
   {
-    name: 'Reflections',
+    name: 'BOS',
     emoji: '📖',
     label: 'Reflections',
   },
@@ -52,7 +52,7 @@ export default function CustomTabBar({ state, descriptors, navigation }: BottomT
           >
             <View style={styles.iconLabelRow}>
               <Text
-                style={[styles.emoji, { color: focused ? LunariaColors.text : LunariaColors.sub }]} 
+                style={[styles.emoji, { color: focused ? HoroscopeColors.accent : HoroscopeColors.text3 }]}
                 accessibilityRole="image"
                 accessibilityLabel={`${tab?.emoji} icon for ${tab?.label}`}
               >
@@ -81,9 +81,9 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
     height: 60,
-    backgroundColor: LunariaColors.card,
+    backgroundColor: HoroscopeColors.surface,
     borderTopWidth: 0.5,
-    borderColor: LunariaColors.border,
+    borderColor: HoroscopeColors.line,
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: 4,
@@ -96,6 +96,7 @@ const styles = StyleSheet.create({
     flexGrow: 0,
     minWidth: 48,
     maxWidth: 120,
+    position: 'relative',
   },
   tabActive: {
     flexGrow: 1,
@@ -105,6 +106,13 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-start',
     alignItems: 'center',
     paddingHorizontal: 12,
+    borderBottomWidth: 2,
+    borderBottomColor: HoroscopeColors.accent,
+    shadowColor: HoroscopeColors.accent,
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.4,
+    shadowRadius: 3,
+    elevation: 3,
   },
   tabInactive: {
     flexGrow: 0,
@@ -127,7 +135,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: 'bold',
     marginLeft: 8,
-    color: LunariaColors.text,
+    color: HoroscopeColors.text,
     maxWidth: 100,
     lineHeight: 18,
     textAlign: 'left',

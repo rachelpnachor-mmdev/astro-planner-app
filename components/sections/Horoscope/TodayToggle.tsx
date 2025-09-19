@@ -1,6 +1,8 @@
 import { Text, View, StyleSheet, ScrollView } from 'react-native';
 import { SegmentControl } from '../../SegmentControl';
 import { HoroscopeColors } from '../../../constants/Colors';
+import { useEntitlement } from '../../../context/EntitlementContext';
+import AdPlaceholder from '../../AdPlaceholder';
 
 const styles = StyleSheet.create({
   container: {
@@ -65,6 +67,7 @@ const styles = StyleSheet.create({
 });
 
 export default function TodayToggle({ locked = false }: { locked?: boolean }) {
+  const { entitlement } = useEntitlement();
   if (locked) {
     return (
       <View style={styles.container}>
@@ -130,6 +133,10 @@ export default function TodayToggle({ locked = false }: { locked?: boolean }) {
           </Text>
           <Text style={styles.themePhrase}>"Trust the cosmic rhythm and let your inner wisdom guide you."</Text>
         </View>
+
+        {entitlement.showAds && (
+          <AdPlaceholder type="banner" testID="horoscope-banner-ad" />
+        )}
 
         <View style={styles.horoscopeCard}>
           <Text style={styles.horoscopeText}>

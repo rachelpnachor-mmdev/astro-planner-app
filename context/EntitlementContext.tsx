@@ -11,6 +11,7 @@ export type EntitlementState = {
   };
   goals: boolean;
   reflections: boolean;
+  showAds: boolean; // true = show ads (no premium), false = hide ads (premium)
 };
 
 const defaultEntitlement: EntitlementState = {
@@ -23,6 +24,7 @@ const defaultEntitlement: EntitlementState = {
   },
   goals: false,
   reflections: false,
+  showAds: true, // Show ads by default (no premium)
 };
 
 export const EntitlementContext = createContext<{

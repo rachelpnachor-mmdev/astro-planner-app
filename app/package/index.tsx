@@ -3,13 +3,13 @@ import { ScrollView, StyleSheet, Text, View, Switch, Alert, TouchableOpacity } f
 import { useNavigation } from '@react-navigation/native';
 import { useRouter } from 'expo-router';
 import { Feather } from '@expo/vector-icons';
-import { LunariaColors } from '../../constants/Colors';
+import { HoroscopeColors } from '../../constants/Colors';
 import { useEntitlement } from '../../context/EntitlementContext';
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: LunariaColors.bg,
+    backgroundColor: HoroscopeColors.bg,
   },
   content: {
     padding: 20,
@@ -17,28 +17,28 @@ const styles = StyleSheet.create({
   header: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: LunariaColors.text,
+    color: HoroscopeColors.text,
     marginBottom: 8,
     textAlign: 'center',
   },
   subtitle: {
     fontSize: 16,
-    color: LunariaColors.sub,
+    color: HoroscopeColors.sub,
     marginBottom: 24,
     textAlign: 'center',
   },
   section: {
-    backgroundColor: LunariaColors.card,
+    backgroundColor: HoroscopeColors.card,
     borderRadius: 12,
     padding: 16,
     marginBottom: 16,
     borderWidth: 1,
-    borderColor: LunariaColors.border,
+    borderColor: HoroscopeColors.border,
   },
   sectionTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: LunariaColors.text,
+    color: HoroscopeColors.text,
     marginBottom: 12,
   },
   entitlementRow: {
@@ -47,33 +47,33 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 8,
     borderBottomWidth: 1,
-    borderBottomColor: LunariaColors.border,
+    borderBottomColor: HoroscopeColors.border,
   },
   entitlementRowLast: {
     borderBottomWidth: 0,
   },
   entitlementLabel: {
     fontSize: 16,
-    color: LunariaColors.text,
+    color: HoroscopeColors.text,
     flex: 1,
   },
   entitlementDescription: {
     fontSize: 14,
-    color: LunariaColors.sub,
+    color: HoroscopeColors.sub,
     marginTop: 2,
   },
   entitlementInfo: {
     flex: 1,
   },
   devNote: {
-    backgroundColor: LunariaColors.focus,
+    backgroundColor: HoroscopeColors.focus,
     borderRadius: 8,
     padding: 12,
     marginBottom: 16,
   },
   devNoteText: {
     fontSize: 14,
-    color: LunariaColors.white,
+    color: HoroscopeColors.white,
     fontWeight: '500',
   },
   topBar: {
@@ -85,11 +85,11 @@ const styles = StyleSheet.create({
   doneButton: {
     paddingHorizontal: 16,
     paddingVertical: 8,
-    backgroundColor: LunariaColors.focus,
+    backgroundColor: HoroscopeColors.focus,
     borderRadius: 20,
   },
   doneButtonText: {
-    color: LunariaColors.white,
+    color: HoroscopeColors.white,
     fontSize: 16,
     fontWeight: '600',
   },
@@ -123,7 +123,7 @@ export default function PackageScreen() {
           accessibilityLabel="Cancel"
           accessibilityRole="button"
         >
-          <Feather name="x" size={24} color={LunariaColors.text} />
+          <Feather name="x" size={24} color={HoroscopeColors.text} />
         </TouchableOpacity>
       ),
     });
@@ -166,6 +166,7 @@ export default function PackageScreen() {
               },
               goals: false,
               reflections: false,
+              showAds: true,
             });
           },
         },
@@ -184,6 +185,7 @@ export default function PackageScreen() {
       },
       goals: true,
       reflections: true,
+      showAds: false,
     });
   };
 
@@ -224,8 +226,8 @@ export default function PackageScreen() {
             <Switch
               value={entitlement.horoscope}
               onValueChange={() => toggleEntitlement('horoscope')}
-              trackColor={{ false: LunariaColors.border, true: LunariaColors.focus }}
-              thumbColor={entitlement.horoscope ? LunariaColors.white : LunariaColors.sub}
+              trackColor={{ false: HoroscopeColors.border, true: HoroscopeColors.focus }}
+              thumbColor={entitlement.horoscope ? HoroscopeColors.white : HoroscopeColors.sub}
             />
           </View>
 
@@ -239,8 +241,8 @@ export default function PackageScreen() {
             <Switch
               value={entitlement.rituals}
               onValueChange={() => toggleEntitlement('rituals')}
-              trackColor={{ false: LunariaColors.border, true: LunariaColors.focus }}
-              thumbColor={entitlement.rituals ? LunariaColors.white : LunariaColors.sub}
+              trackColor={{ false: HoroscopeColors.border, true: HoroscopeColors.focus }}
+              thumbColor={entitlement.rituals ? HoroscopeColors.white : HoroscopeColors.sub}
             />
           </View>
 
@@ -254,8 +256,8 @@ export default function PackageScreen() {
             <Switch
               value={entitlement.goals}
               onValueChange={() => toggleEntitlement('goals')}
-              trackColor={{ false: LunariaColors.border, true: LunariaColors.focus }}
-              thumbColor={entitlement.goals ? LunariaColors.white : LunariaColors.sub}
+              trackColor={{ false: HoroscopeColors.border, true: HoroscopeColors.focus }}
+              thumbColor={entitlement.goals ? HoroscopeColors.white : HoroscopeColors.sub}
             />
           </View>
 
@@ -269,8 +271,8 @@ export default function PackageScreen() {
             <Switch
               value={entitlement.reflections}
               onValueChange={() => toggleEntitlement('reflections')}
-              trackColor={{ false: LunariaColors.border, true: LunariaColors.focus }}
-              thumbColor={entitlement.reflections ? LunariaColors.white : LunariaColors.sub}
+              trackColor={{ false: HoroscopeColors.border, true: HoroscopeColors.focus }}
+              thumbColor={entitlement.reflections ? HoroscopeColors.white : HoroscopeColors.sub}
             />
           </View>
         </View>
@@ -288,8 +290,8 @@ export default function PackageScreen() {
             <Switch
               value={entitlement.kitchenHome.chores}
               onValueChange={() => toggleEntitlement('kitchenHome', 'chores')}
-              trackColor={{ false: LunariaColors.border, true: LunariaColors.focus }}
-              thumbColor={entitlement.kitchenHome.chores ? LunariaColors.white : LunariaColors.sub}
+              trackColor={{ false: HoroscopeColors.border, true: HoroscopeColors.focus }}
+              thumbColor={entitlement.kitchenHome.chores ? HoroscopeColors.white : HoroscopeColors.sub}
             />
           </View>
 
@@ -303,8 +305,8 @@ export default function PackageScreen() {
             <Switch
               value={entitlement.kitchenHome.meals}
               onValueChange={() => toggleEntitlement('kitchenHome', 'meals')}
-              trackColor={{ false: LunariaColors.border, true: LunariaColors.focus }}
-              thumbColor={entitlement.kitchenHome.meals ? LunariaColors.white : LunariaColors.sub}
+              trackColor={{ false: HoroscopeColors.border, true: HoroscopeColors.focus }}
+              thumbColor={entitlement.kitchenHome.meals ? HoroscopeColors.white : HoroscopeColors.sub}
             />
           </View>
 
@@ -318,8 +320,27 @@ export default function PackageScreen() {
             <Switch
               value={entitlement.kitchenHome.mixedUnlock}
               onValueChange={() => toggleEntitlement('kitchenHome', 'mixedUnlock')}
-              trackColor={{ false: LunariaColors.border, true: LunariaColors.focus }}
-              thumbColor={entitlement.kitchenHome.mixedUnlock ? LunariaColors.white : LunariaColors.sub}
+              trackColor={{ false: HoroscopeColors.border, true: HoroscopeColors.focus }}
+              thumbColor={entitlement.kitchenHome.mixedUnlock ? HoroscopeColors.white : HoroscopeColors.sub}
+            />
+          </View>
+        </View>
+
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Ad Testing</Text>
+
+          <View style={styles.entitlementRow}>
+            <View style={styles.entitlementInfo}>
+              <Text style={styles.entitlementLabel}>Show Ads</Text>
+              <Text style={styles.entitlementDescription}>
+                Toggle ad display (true = show ads, false = premium)
+              </Text>
+            </View>
+            <Switch
+              value={entitlement.showAds}
+              onValueChange={() => toggleEntitlement('showAds')}
+              trackColor={{ false: HoroscopeColors.border, true: HoroscopeColors.focus }}
+              thumbColor={entitlement.showAds ? HoroscopeColors.white : HoroscopeColors.sub}
             />
           </View>
         </View>
@@ -337,8 +358,8 @@ export default function PackageScreen() {
             <Switch
               value={false}
               onValueChange={unlockAll}
-              trackColor={{ false: LunariaColors.border, true: LunariaColors.focus }}
-              thumbColor={LunariaColors.sub}
+              trackColor={{ false: HoroscopeColors.border, true: HoroscopeColors.focus }}
+              thumbColor={HoroscopeColors.sub}
             />
           </View>
 
@@ -352,8 +373,8 @@ export default function PackageScreen() {
             <Switch
               value={false}
               onValueChange={resetAll}
-              trackColor={{ false: LunariaColors.border, true: LunariaColors.focus }}
-              thumbColor={LunariaColors.sub}
+              trackColor={{ false: HoroscopeColors.border, true: HoroscopeColors.focus }}
+              thumbColor={HoroscopeColors.sub}
             />
           </View>
         </View>

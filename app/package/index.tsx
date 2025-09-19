@@ -23,7 +23,7 @@ const styles = StyleSheet.create({
   },
   subtitle: {
     fontSize: 16,
-    color: HoroscopeColors.sub,
+    color: HoroscopeColors.text2,
     marginBottom: 24,
     textAlign: 'center',
   },
@@ -33,7 +33,7 @@ const styles = StyleSheet.create({
     padding: 16,
     marginBottom: 16,
     borderWidth: 1,
-    borderColor: HoroscopeColors.border,
+    borderColor: HoroscopeColors.line,
   },
   sectionTitle: {
     fontSize: 18,
@@ -47,7 +47,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 8,
     borderBottomWidth: 1,
-    borderBottomColor: HoroscopeColors.border,
+    borderBottomColor: HoroscopeColors.line,
   },
   entitlementRowLast: {
     borderBottomWidth: 0,
@@ -59,21 +59,21 @@ const styles = StyleSheet.create({
   },
   entitlementDescription: {
     fontSize: 14,
-    color: HoroscopeColors.sub,
+    color: HoroscopeColors.text3,
     marginTop: 2,
   },
   entitlementInfo: {
     flex: 1,
   },
   devNote: {
-    backgroundColor: HoroscopeColors.focus,
+    backgroundColor: HoroscopeColors.accent,
     borderRadius: 8,
     padding: 12,
     marginBottom: 16,
   },
   devNoteText: {
     fontSize: 14,
-    color: HoroscopeColors.white,
+    color: HoroscopeColors.bg,
     fontWeight: '500',
   },
   topBar: {
@@ -85,11 +85,11 @@ const styles = StyleSheet.create({
   doneButton: {
     paddingHorizontal: 16,
     paddingVertical: 8,
-    backgroundColor: HoroscopeColors.focus,
+    backgroundColor: HoroscopeColors.accent,
     borderRadius: 20,
   },
   doneButtonText: {
-    color: HoroscopeColors.white,
+    color: HoroscopeColors.bg,
     fontSize: 16,
     fontWeight: '600',
   },
@@ -226,8 +226,8 @@ export default function PackageScreen() {
             <Switch
               value={entitlement.horoscope}
               onValueChange={() => toggleEntitlement('horoscope')}
-              trackColor={{ false: HoroscopeColors.border, true: HoroscopeColors.focus }}
-              thumbColor={entitlement.horoscope ? HoroscopeColors.white : HoroscopeColors.sub}
+              trackColor={{ false: HoroscopeColors.line, true: HoroscopeColors.accent }}
+              thumbColor={entitlement.horoscope ? HoroscopeColors.text : HoroscopeColors.text3}
             />
           </View>
 
@@ -241,8 +241,8 @@ export default function PackageScreen() {
             <Switch
               value={entitlement.rituals}
               onValueChange={() => toggleEntitlement('rituals')}
-              trackColor={{ false: HoroscopeColors.border, true: HoroscopeColors.focus }}
-              thumbColor={entitlement.rituals ? HoroscopeColors.white : HoroscopeColors.sub}
+              trackColor={{ false: HoroscopeColors.line, true: HoroscopeColors.accent }}
+              thumbColor={entitlement.rituals ? HoroscopeColors.text : HoroscopeColors.text3}
             />
           </View>
 
@@ -256,8 +256,8 @@ export default function PackageScreen() {
             <Switch
               value={entitlement.goals}
               onValueChange={() => toggleEntitlement('goals')}
-              trackColor={{ false: HoroscopeColors.border, true: HoroscopeColors.focus }}
-              thumbColor={entitlement.goals ? HoroscopeColors.white : HoroscopeColors.sub}
+              trackColor={{ false: HoroscopeColors.line, true: HoroscopeColors.accent }}
+              thumbColor={entitlement.goals ? HoroscopeColors.text : HoroscopeColors.text3}
             />
           </View>
 
@@ -271,8 +271,8 @@ export default function PackageScreen() {
             <Switch
               value={entitlement.reflections}
               onValueChange={() => toggleEntitlement('reflections')}
-              trackColor={{ false: HoroscopeColors.border, true: HoroscopeColors.focus }}
-              thumbColor={entitlement.reflections ? HoroscopeColors.white : HoroscopeColors.sub}
+              trackColor={{ false: HoroscopeColors.line, true: HoroscopeColors.accent }}
+              thumbColor={entitlement.reflections ? HoroscopeColors.text : HoroscopeColors.text3}
             />
           </View>
         </View>
@@ -290,8 +290,8 @@ export default function PackageScreen() {
             <Switch
               value={entitlement.kitchenHome.chores}
               onValueChange={() => toggleEntitlement('kitchenHome', 'chores')}
-              trackColor={{ false: HoroscopeColors.border, true: HoroscopeColors.focus }}
-              thumbColor={entitlement.kitchenHome.chores ? HoroscopeColors.white : HoroscopeColors.sub}
+              trackColor={{ false: HoroscopeColors.line, true: HoroscopeColors.accent }}
+              thumbColor={entitlement.kitchenHome.chores ? HoroscopeColors.text : HoroscopeColors.text3}
             />
           </View>
 
@@ -305,8 +305,8 @@ export default function PackageScreen() {
             <Switch
               value={entitlement.kitchenHome.meals}
               onValueChange={() => toggleEntitlement('kitchenHome', 'meals')}
-              trackColor={{ false: HoroscopeColors.border, true: HoroscopeColors.focus }}
-              thumbColor={entitlement.kitchenHome.meals ? HoroscopeColors.white : HoroscopeColors.sub}
+              trackColor={{ false: HoroscopeColors.line, true: HoroscopeColors.accent }}
+              thumbColor={entitlement.kitchenHome.meals ? HoroscopeColors.text : HoroscopeColors.text3}
             />
           </View>
 
@@ -320,8 +320,8 @@ export default function PackageScreen() {
             <Switch
               value={entitlement.kitchenHome.mixedUnlock}
               onValueChange={() => toggleEntitlement('kitchenHome', 'mixedUnlock')}
-              trackColor={{ false: HoroscopeColors.border, true: HoroscopeColors.focus }}
-              thumbColor={entitlement.kitchenHome.mixedUnlock ? HoroscopeColors.white : HoroscopeColors.sub}
+              trackColor={{ false: HoroscopeColors.line, true: HoroscopeColors.accent }}
+              thumbColor={entitlement.kitchenHome.mixedUnlock ? HoroscopeColors.text : HoroscopeColors.text3}
             />
           </View>
         </View>
@@ -339,8 +339,8 @@ export default function PackageScreen() {
             <Switch
               value={entitlement.showAds}
               onValueChange={() => toggleEntitlement('showAds')}
-              trackColor={{ false: HoroscopeColors.border, true: HoroscopeColors.focus }}
-              thumbColor={entitlement.showAds ? HoroscopeColors.white : HoroscopeColors.sub}
+              trackColor={{ false: HoroscopeColors.line, true: HoroscopeColors.accent }}
+              thumbColor={entitlement.showAds ? HoroscopeColors.text : HoroscopeColors.text3}
             />
           </View>
         </View>
@@ -358,8 +358,8 @@ export default function PackageScreen() {
             <Switch
               value={false}
               onValueChange={unlockAll}
-              trackColor={{ false: HoroscopeColors.border, true: HoroscopeColors.focus }}
-              thumbColor={HoroscopeColors.sub}
+              trackColor={{ false: HoroscopeColors.line, true: HoroscopeColors.accent }}
+              thumbColor={HoroscopeColors.text3}
             />
           </View>
 
@@ -373,8 +373,8 @@ export default function PackageScreen() {
             <Switch
               value={false}
               onValueChange={resetAll}
-              trackColor={{ false: HoroscopeColors.border, true: HoroscopeColors.focus }}
-              thumbColor={HoroscopeColors.sub}
+              trackColor={{ false: HoroscopeColors.line, true: HoroscopeColors.accent }}
+              thumbColor={HoroscopeColors.text3}
             />
           </View>
         </View>

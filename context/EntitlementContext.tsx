@@ -14,7 +14,7 @@ export type EntitlementState = {
 };
 
 const defaultEntitlement: EntitlementState = {
-  horoscope: false,
+  horoscope: true,
   rituals: false,
   kitchenHome: {
     chores: false,

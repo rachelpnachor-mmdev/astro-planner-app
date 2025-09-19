@@ -48,3 +48,42 @@ export const LunariaColors = {
   danger: '#FF5C5C',
   focus: '#6AA9FF',
 };
+
+// Horoscope Module Color Tokens (as per spec)
+export const HoroscopeColors = {
+  // Backgrounds
+  bg: '#0B0F14',           // space black
+  surface: '#0F1624',      // deep navy
+  card: '#111A2A',         // card background
+  cardSubtle: '#0D1420',   // card subtle
+  line: '#1E2A44',         // dividers/hairlines
+
+  // Accents
+  accent: '#E7C888',       // celestial gold
+  accentEmph: '#F0D79E',   // accent hover/active
+  accent2: '#33D2C5',      // secondary accent (aqua)
+  accent3: '#6EA8FF',      // tertiary accent (indigo)
+
+  // Text
+  text: '#F5F7FA',         // text high
+  text2: '#CBD5E1',        // text secondary
+  text3: '#94A3B8',        // text muted
+  disabled: '#5B6B82',     // disabled
+
+  // Status
+  success: '#22C55E',
+  warning: '#F59E0B',
+  error: '#EF4444',
+
+  // Planetary glyph colors (optional, subtle)
+  planetarySun: '#F4C84B',
+  planetaryMoon: '#9BB7FF',
+  planetaryMercury: '#A0AEC0',
+  planetaryVenus: '#F5A3B8',
+  planetaryMars: '#FF6A6A',
+  planetaryJupiter: '#F59E0B',
+  planetarySaturn: '#C5B38C',
+  planetaryUranus: '#60A5FA',
+  planetaryNeptune: '#7DD3FC',
+  planetaryPluto: '#A78BFA',
+};

@@ -1,81 +1,102 @@
 
 import { useNavigation } from '@react-navigation/native';
-import React, { useRef, useState } from 'react';
-import { Button, Dimensions, ScrollView, StyleSheet, Text, View } from 'react-native';
-import FocusOfDay from '../components/sections/Horoscope/FocusOfDay';
-import TaskList from '../components/sections/Horoscope/TaskList';
+import React, { useRef, useState, useEffect } from 'react';
+import { Dimensions, ScrollView, StyleSheet, Text, View, StatusBar, Pressable, Image, TouchableOpacity } from 'react-native';
+import { Feather } from '@expo/vector-icons';
 import TodayToggle from '../components/sections/Horoscope/TodayToggle';
 import TransitSummary from '../components/sections/Horoscope/TransitSummary';
 import UpcomingEvents from '../components/sections/Horoscope/UpcomingEvents';
 import { useEntitlement } from '../context/EntitlementContext';
-import { LunariaColors } from '../constants/Colors';
+import { HoroscopeColors } from '../constants/Colors';
+import StarfieldBackground from '../components/StarfieldBackground';
+import HamburgerMenu from '../components/HamburgerMenu';
 
 const { width } = Dimensions.get('window');
 
+// Pre-load the header logo (now optimized)
+const headerLogo = require('../assets/images/LunariaLogoHeader.png');
+
 const styles = StyleSheet.create({
-  labelPreviewRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginHorizontal: 8,
-    marginBottom: 4,
-    minHeight: 18,
-  },
-  labelPreviewLeft: {
+  root: {
     flex: 1,
-    alignItems: 'flex-start',
-    opacity: 0.5,
-    minWidth: 0,
+    backgroundColor: HoroscopeColors.bg
   },
-  labelPreviewRight: {
+  scrollView: {
     flex: 1,
-    alignItems: 'flex-end',
-    opacity: 0.5,
-    minWidth: 0,
   },
-  labelPreviewText: {
-    fontSize: 13,
-    color: LunariaColors.sub,
-    fontStyle: 'italic',
-    maxWidth: width * 0.45,
+  scrollContent: {
+    flexGrow: 1,
   },
-  root: { flex: 1, backgroundColor: LunariaColors.bg },
-  container: { alignItems: 'flex-start' },
-  header: { fontSize: 28, fontWeight: 'bold', marginBottom: 16, marginTop: 24, marginLeft: 24 },
-  indicatorRow: {
+  panel: {
+    width,
+    flex: 1,
+    paddingHorizontal: 10, // Small horizontal margin for readability
+    paddingTop: 125, // More space to clear the logo area
+    paddingBottom: 35, // Even less bottom space for max content
+  },
+  indicatorContainer: {
+    position: 'absolute',
+    bottom: 0, // At the very bottom to see positioning
+    left: 0,
+    right: 0,
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 8,
+    zIndex: 10,
+    paddingVertical: 12,
+  },
+  indicator: {
+    padding: 8,
+    marginHorizontal: 4,
+  },
+  indicatorActive: {
+    // Active state handled by dot styling
   },
   dot: {
     width: 8,
     height: 8,
     borderRadius: 4,
-    backgroundColor: LunariaColors.border,
-    marginHorizontal: 4,
+    backgroundColor: HoroscopeColors.text3,
+    opacity: 0.4,
   },
   dotActive: {
-    backgroundColor: LunariaColors.focus,
+    backgroundColor: HoroscopeColors.accent,
+    opacity: 1,
+    shadowColor: HoroscopeColors.accent,
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.3,
+    shadowRadius: 3,
+    elevation: 3,
   },
-  section: { justifyContent: 'center', alignItems: 'flex-start' },
-  sectionTitle: { fontSize: 16, fontWeight: '600' },
+  logoContainerInline: {
+    position: 'absolute',
+    top: -45,
+    left: -20,
+    backgroundColor: 'rgba(11, 15, 20, 0.7)',
+    borderRadius: 16,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    alignSelf: 'flex-start',
+    width: 'auto',
+    zIndex: -1, // Behind all content
+  },
+  pageLogo: {
+    height: 240, // 100% bigger (120 * 2)
+    width: 240, // 100% bigger (120 * 2)
+  },
 });
 
 
+// New 3-panel structure as per spec
 const SECTION_COMPONENTS = [
-  TodayToggle,
-  TransitSummary,
-  FocusOfDay,
-  TaskList,
-  UpcomingEvents,
+  TodayToggle,      // Panel 1: Horoscope (includes segmented control)
+  TransitSummary,   // Panel 2: Transit Summary
+  UpcomingEvents,   // Panel 3: Upcoming Events
 ];
 
 const SECTION_LABELS = [
-  'Today/Week/Month toggle (segmented control)',
+  'Horoscope',
   'Transit Summary',
-  'Focus of the Day (Do/Don’t/Opportunities/Warnings)',
-  'Task List',
   'Upcoming Events',
 ];
 
@@ -83,16 +104,23 @@ const SECTION_LABELS = [
 export default function HoroscopeScreen() {
   const navigation = useNavigation();
   const [page, setPage] = useState(0);
+  const [isMenuVisible, setIsMenuVisible] = useState(false);
+  const [logoLoaded, setLogoLoaded] = useState(false);
   const scrollRef = useRef(null);
-  const { entitlement, setEntitlement } = useEntitlement();
+  const { entitlement } = useEntitlement();
+
+  // Force image preload
+  useEffect(() => {
+    Image.prefetch(Image.resolveAssetSource(headerLogo).uri)
+      .then(() => setLogoLoaded(true))
+      .catch(() => setLogoLoaded(true)); // Show even if prefetch fails
+  }, []);
 
   // Determine locked state for each section
   const lockedStates = [
-    !entitlement.horoscope, // TodayToggle
-    !entitlement.horoscope, // TransitSummary
-    !entitlement.horoscope, // FocusOfDay
-    !entitlement.horoscope, // TaskList
-    !entitlement.horoscope, // UpcomingEvents
+    !entitlement.horoscope, // Horoscope panel
+    !entitlement.horoscope, // Transit Summary
+    !entitlement.horoscope, // Upcoming Events
   ];
 
   const handleScroll = (event: { nativeEvent: { contentOffset: { x: number } } }) => {
@@ -101,74 +129,124 @@ export default function HoroscopeScreen() {
     setPage(newPage);
   };
 
+  const navigateToPanel = (panelIndex: number) => {
+    scrollRef.current?.scrollTo({
+      x: panelIndex * width,
+      animated: true,
+    });
+    setPage(panelIndex);
+  };
+
   React.useEffect(() => {
     navigation.setOptions({
-      headerTitle: () => (
-        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-start', flex: 1 }}>
-          <Text style={{ fontSize: 28, marginRight: 8 }} accessibilityLabel="Horoscope moon icon">🌙</Text>
-          <Text style={{ fontSize: 22, fontWeight: 'bold' }} accessibilityLabel="Horoscope section header">Horoscope</Text>
-        </View>
+      headerShown: true,
+      headerStyle: {
+        backgroundColor: 'transparent',
+        elevation: 0,
+        shadowOpacity: 0,
+        borderBottomWidth: 0,
+        height: 60,
+      },
+      headerBackground: () => (
+        <View style={{
+          flex: 1,
+          backgroundColor: 'transparent'
+        }} />
+      ),
+      headerTransparent: true,
+      headerTintColor: HoroscopeColors.text,
+      headerTitle: () => null,
+      headerRight: () => (
+        <TouchableOpacity
+          onPress={() => setIsMenuVisible(true)}
+          style={{
+            marginRight: 12,
+            backgroundColor: 'rgba(11, 15, 20, 0.8)',
+            padding: 10,
+            borderRadius: 12,
+            width: 44,
+            height: 44,
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+          accessibilityLabel="Open menu"
+          accessibilityRole="button"
+        >
+          <Feather name="menu" size={22} color={HoroscopeColors.text} />
+        </TouchableOpacity>
       ),
     });
   }, [navigation]);
 
   return (
-    <View
-      style={styles.root}
-  accessibilityRole="header"
-      accessibilityLabel="Horoscope main content"
-    >
-      <View style={{ alignItems: 'flex-end', marginRight: 16, marginBottom: 4 }}>
-        <Button
-          title={entitlement.horoscope ? 'Lock Horoscope' : 'Unlock Horoscope'}
-          onPress={() => setEntitlement({ ...entitlement, horoscope: !entitlement.horoscope })}
-          accessibilityLabel={entitlement.horoscope ? 'Lock Horoscope access' : 'Unlock Horoscope access'}
-        />
+    <View style={styles.root}>
+      <StatusBar barStyle="light-content" backgroundColor={HoroscopeColors.bg} />
+
+      {/* Starfield Background */}
+      <View style={StyleSheet.absoluteFill}>
+        <StarfieldBackground />
       </View>
-      <View style={styles.labelPreviewRow}>
-        <View style={styles.labelPreviewLeft}>
-          {page > 0 && (
-            <Text style={styles.labelPreviewText} numberOfLines={1}>
-              ← {SECTION_LABELS[page - 1]}
-            </Text>
-          )}
-        </View>
-        <View style={styles.labelPreviewRight}>
-          {page < SECTION_LABELS.length - 1 && (
-            <Text style={styles.labelPreviewText} numberOfLines={1}>
-              {SECTION_LABELS[page + 1]} →
-            </Text>
-          )}
-        </View>
-      </View>
+
+      {/* Horizontal Scrolling Panels */}
       <ScrollView
         ref={scrollRef}
         horizontal
         pagingEnabled
         showsHorizontalScrollIndicator={false}
-        contentContainerStyle={styles.container}
+        contentContainerStyle={styles.scrollContent}
         onScroll={handleScroll}
         scrollEventThrottle={16}
+        style={styles.scrollView}
         accessibilityRole="scrollbar"
-        accessibilityLabel="Horoscope sections scrollable area"
+        accessibilityLabel="Horoscope panels scrollable area"
       >
         {SECTION_COMPONENTS.map((SectionComponent, idx) => (
-          <View key={idx} style={[styles.section, { width }]}> 
+          <View key={idx} style={styles.panel}>
+            {/* Logo positioned within first panel only */}
+            {idx === 0 && (
+              <View style={styles.logoContainerInline}>
+                <Image
+                  source={headerLogo}
+                  style={styles.pageLogo}
+                  resizeMode="contain"
+                />
+              </View>
+            )}
             <SectionComponent locked={lockedStates[idx]} />
           </View>
         ))}
       </ScrollView>
-      <View style={styles.indicatorRow}>
-        {SECTION_COMPONENTS.map((_, idx) => (
-          <View
-            key={idx}
-            style={[styles.dot, page === idx && styles.dotActive]}
-            accessibilityRole="adjustable"
-            accessibilityLabel={`Page indicator dot ${idx + 1} of ${SECTION_COMPONENTS.length}${page === idx ? ' (current page)' : ''}`}
-            accessibilityState={{ selected: page === idx }}
-          />
-        ))}
+
+      {/* Panel Indicator Dots */}
+      <View style={styles.indicatorContainer}>
+        {SECTION_COMPONENTS.map((_, idx) => {
+          const isActive = page === idx;
+          return (
+            <Pressable
+              key={idx}
+              style={[
+                styles.indicator,
+                isActive && styles.indicatorActive,
+              ]}
+              onPress={() => navigateToPanel(idx)}
+              accessibilityRole="tab"
+              accessibilityState={{ selected: isActive }}
+              accessibilityLabel={`${SECTION_LABELS[idx]} panel`}
+            >
+              <View style={[
+                styles.dot,
+                isActive && styles.dotActive,
+              ]} />
+            </Pressable>
+          );
+        })}
       </View>
+
+      {/* Hamburger Menu */}
+      <HamburgerMenu
+        visible={isMenuVisible}
+        onClose={() => setIsMenuVisible(false)}
+      />
     </View>
   );
 }
